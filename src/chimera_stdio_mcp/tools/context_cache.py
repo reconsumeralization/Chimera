@@ -69,6 +69,8 @@ class ContextCacheTool(BaseTool):
                 return await self._handle_stats(context_cache)
             elif operation == "clear":
                 return await self._handle_clear(context_cache)
+            elif operation == "store":
+                return await self._handle_store(context_cache, params)
             else:
                 return {"error": f"Unknown operation: {operation}"}
         except Exception as e:
@@ -158,6 +160,41 @@ class ContextCacheTool(BaseTool):
         success = await context_cache.clear_cache()
         return {"success": success}
     
+    async def _handle_store(self, context_cache: ContextCacheService, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Handle store operation."""
+        valid, error = self.validate_params(params, ["snapshot"])
+        if not valid:
+            return {"error": error}
+        
+        snapshot_data = params["snapshot"]
+        
+        try:
+            # If snapshot_data is a string, try to parse it as JSON
+            if isinstance(snapshot_data, str):
+                try:
+                    snapshot_data = json.loads(snapshot_data)
+                except json.JSONDecodeError:
+                    return {"error": "Invalid JSON in snapshot data"}
+            
+            # Create ContextSnapshot from the data
+            try:
+                snapshot = ContextSnapshot.model_validate(snapshot_data)
+            except Exception as e:
+                return {"error": f"Invalid snapshot data: {str(e)}"}
+            
+            # Store the snapshot
+            snapshot_id = await context_cache.store_snapshot(snapshot)
+            
+            return {
+                "success": True,
+                "snapshot_id": snapshot_id,
+                "file_count": len(snapshot.files),
+                "diagnostic_count": len(snapshot.diagnostics)
+            }
+        except Exception as e:
+            self.log.exception("Error storing snapshot", error=str(e))
+            return {"error": f"Error storing snapshot: {str(e)}"}
+    
     @classmethod
     def get_schema(cls) -> Dict[str, Any]:
         """Get the JSON schema for the context_cache tool."""
@@ -169,8 +206,8 @@ class ContextCacheTool(BaseTool):
                 "properties": {
                     "operation": {
                         "type": "string",
-                        "description": "The operation to perform (query, stats, clear)",
-                        "enum": ["query", "stats", "clear"]
+                        "description": "The operation to perform (query, stats, clear, store)",
+                        "enum": ["query", "stats", "clear", "store"]
                     },
                     "query_text": {
                         "type": "string",
@@ -212,6 +249,10 @@ class ContextCacheTool(BaseTool):
                     "time_range_end": {
                         "type": "string",
                         "description": "End of time range (ISO format or Unix timestamp)"
+                    },
+                    "snapshot": {
+                        "type": "object",
+                        "description": "Snapshot data to store (for store operation)"
                     }
                 },
                 "required": ["operation"]

@@ -98,37 +98,73 @@ async def test_context_cache_tool():
     """Test the context cache tool."""
     logger.info("Testing context cache tool...")
     
-    # Create test context and cache it
-    context_cache = await create_test_context_snapshot()
-    
     # Create the tool
     tool = ContextCacheTool()
-    tool.context_cache = context_cache
     
-    # Test stats operation
-    logger.info("Testing stats operation...")
+    # First, try the store operation
+    logger.info("Testing store operation...")
+    snapshot = {
+        "workspace_root": "/test/workspace/store_op",
+        "active_file": "/test/workspace/store_op/app.py",
+        "files": {
+            "app.py": {
+                "path": "app.py",
+                "content": "from flask import Flask\n\napp = Flask(__name__)\n\n@app.route('/')\ndef hello():\n    return 'Hello, world!'",
+                "language": "python",
+                "last_modified": datetime.now().isoformat(),
+                "size_bytes": 200,
+                "is_open": True,
+                "is_dirty": False,
+            },
+            "README.md": {
+                "path": "README.md",
+                "content": "# Test App\n\nThis is a test application.",
+                "language": "markdown",
+                "last_modified": datetime.now().isoformat(),
+                "size_bytes": 100,
+                "is_open": False,
+                "is_dirty": False,
+            }
+        },
+        "diagnostics": [
+            {
+                "file_path": "app.py",
+                "message": "Missing type annotations",
+                "severity": "info",
+                "line": 5,
+                "column": 0,
+                "source": "pyright",
+                "code": "reportMissingTypeStubs"
+            }
+        ],
+        "metadata": {
+            "operation": "test_store",
+            "timestamp": datetime.now().isoformat()
+        }
+    }
+    
+    store_result = await tool.execute({
+        "operation": "store",
+        "snapshot": snapshot
+    })
+    logger.info("Store result:")
+    pprint(store_result)
+    
+    # Test stats operation to see if the snapshot was stored
+    logger.info("Testing stats operation after store...")
     stats_result = await tool.execute({"operation": "stats"})
     logger.info("Stats result:")
     pprint(stats_result)
     
-    # Test query operation (all files)
-    logger.info("Testing query operation (all files)...")
+    # Test query operation to find the stored files
+    logger.info("Testing query operation on stored files...")
     query_result = await tool.execute({
         "operation": "query",
+        "query_text": "Flask",
         "include_content": True,
     })
     logger.info(f"Query result: {len(query_result.get('matches', []))} files found")
     pprint(query_result)
-    
-    # Test query operation (filter by language)
-    logger.info("Testing query operation (python files)...")
-    query_python_result = await tool.execute({
-        "operation": "query",
-        "languages": ["python"],
-        "include_content": True,
-    })
-    logger.info(f"Python files query result: {len(query_python_result.get('matches', []))} files found")
-    pprint(query_python_result)
     
     # Test clear operation
     logger.info("Testing clear operation...")

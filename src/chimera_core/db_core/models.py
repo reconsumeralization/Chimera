@@ -51,7 +51,7 @@ class ContextSnapshotOrm(SQLModel, table=True):
     timestamp: datetime = Field(default_factory=datetime.now)
     workspace_root: str = Field(...)
     active_file: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    meta_data: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     size_bytes: Optional[int] = None
 
     # Relationships

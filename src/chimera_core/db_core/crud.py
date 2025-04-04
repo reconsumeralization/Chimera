@@ -464,7 +464,7 @@ async def create_context_snapshot(
             timestamp=snapshot.timestamp,
             workspace_root=snapshot.workspace_root,
             active_file=snapshot.active_file,
-            metadata=snapshot.metadata,
+            meta_data=snapshot.metadata,
             size_bytes=snapshot_size,
         )
         
@@ -741,5 +741,5 @@ async def convert_snapshot_to_schema(
         active_file=snapshot_orm.active_file,
         files=files,
         diagnostics=diagnostics,
-        metadata=snapshot_orm.metadata or {},
+        metadata=snapshot_orm.meta_data or {},
     ) 
