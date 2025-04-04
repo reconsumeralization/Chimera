@@ -478,6 +478,9 @@ class ContextCacheService:
         """
         Query the context cache for relevant files.
         
+        This method searches both in-memory snapshots and the database (if enabled)
+        to find files matching the query parameters.
+        
         Args:
             query: The query parameters
             
@@ -495,7 +498,11 @@ class ContextCacheService:
                 has_more=False
             )
             
-            # Get all snapshots to search (in-memory ones)
+            # Track all matching files
+            matching_files: List[FileData] = []
+            file_paths_seen = set()  # To keep track of files we've already added
+            
+            # ------------ Search in-memory snapshots first ------------
             snapshots_to_search = list(self.recent_snapshots.values())
             
             # Filter by time range if specified
@@ -511,10 +518,7 @@ class ContextCacheService:
                     if s.timestamp <= query.time_range_end
                 ]
             
-            # Collect matching files from all snapshots
-            matching_files: List[FileData] = []
-            file_paths_seen = set()  # To keep track of files we've already added
-            
+            # Find matching files in memory
             for snapshot in snapshots_to_search:
                 for file_data in snapshot.files:
                     file_path = file_data.path
@@ -555,22 +559,128 @@ class ContextCacheService:
                     
                     # Add to matches if we get here
                     file_paths_seen.add(file_path)
+                    matching_files.append(file_data)
+            
+            # ------------ Search database if enabled ------------
+            if self.options.enable_db_storage and (
+                query.time_range_start or  # Historical query
+                query.time_range_end or
+                len(matching_files) < (query.max_files or 10)  # Not enough results from memory
+            ):
+                try:
+                    from src.chimera_core.db_core import connection, crud
+                    from sqlalchemy import and_, or_, func, select
                     
-                    # Create a copy of the file data
-                    match = FileData(
-                        path=file_data.path,
-                        language=file_data.language,
-                        size_bytes=file_data.size_bytes,
-                        last_modified=file_data.last_modified,
-                        is_open=file_data.is_open,
-                        is_dirty=file_data.is_dirty,
-                    )
-                    
-                    # Add content if requested
-                    if query.include_content and file_data.content:
-                        match.content = file_data.content
-                    
-                    matching_files.append(match)
+                    async with connection.get_db_session() as session:
+                        # Start building the query for snapshots
+                        snapshot_query = select(crud.ContextSnapshotOrm)
+                        
+                        # Add time range filters if specified
+                        conditions = []
+                        if query.time_range_start:
+                            conditions.append(crud.ContextSnapshotOrm.timestamp >= query.time_range_start)
+                        if query.time_range_end:
+                            conditions.append(crud.ContextSnapshotOrm.timestamp <= query.time_range_end)
+                        
+                        if conditions:
+                            snapshot_query = snapshot_query.where(and_(*conditions))
+                        
+                        # Order by timestamp (most recent first) and limit
+                        snapshot_query = snapshot_query.order_by(crud.ContextSnapshotOrm.timestamp.desc())
+                        
+                        # Limit to a reasonable number of snapshots to search
+                        # We'll apply more filtering on the files later
+                        snapshot_query = snapshot_query.limit(50)
+                        
+                        # Execute the query
+                        result = await session.execute(snapshot_query)
+                        db_snapshots = result.scalars().all()
+                        
+                        logger.debug(
+                            "Database query returned snapshots",
+                            count=len(db_snapshots),
+                            time_range_start=query.time_range_start,
+                            time_range_end=query.time_range_end
+                        )
+                        
+                        # For each snapshot, load files and check for matches
+                        for snapshot_orm in db_snapshots:
+                            # Load files for this snapshot
+                            file_query = select(crud.FileDataOrm).where(
+                                crud.FileDataOrm.snapshot_id == snapshot_orm.id
+                            )
+                            
+                            # Add file pattern filters if specified
+                            if query.file_patterns:
+                                pattern_conditions = []
+                                for pattern in query.file_patterns:
+                                    # Convert glob pattern to SQL LIKE pattern
+                                    # This is a simplification; full glob matching requires more complex logic
+                                    sql_pattern = pattern.replace('*', '%').replace('?', '_')
+                                    pattern_conditions.append(crud.FileDataOrm.path.like(sql_pattern))
+                                
+                                if pattern_conditions:
+                                    file_query = file_query.where(or_(*pattern_conditions))
+                            
+                            # Add exclude pattern filters if specified
+                            if query.exclude_patterns:
+                                for pattern in query.exclude_patterns:
+                                    # Convert glob pattern to SQL LIKE pattern
+                                    sql_pattern = pattern.replace('*', '%').replace('?', '_')
+                                    file_query = file_query.where(~crud.FileDataOrm.path.like(sql_pattern))
+                            
+                            # Add language filters if specified
+                            if query.languages:
+                                language_conditions = []
+                                for lang in query.languages:
+                                    language_conditions.append(func.lower(crud.FileDataOrm.language) == lang.lower())
+                                
+                                if language_conditions:
+                                    file_query = file_query.where(or_(*language_conditions))
+                            
+                            # Add text search if specified
+                            if query.query_text and query.query_text.strip():
+                                query_text = f"%{query.query_text}%"
+                                file_query = file_query.where(
+                                    or_(
+                                        crud.FileDataOrm.path.ilike(query_text),
+                                        # Note: Searching in content requires the content to be stored in the DB
+                                        # which may not be the case depending on configuration
+                                        crud.FileDataOrm.content.ilike(query_text) if query.include_content else False
+                                    )
+                                )
+                            
+                            # Execute the file query
+                            file_result = await session.execute(file_query)
+                            matching_db_files = file_result.scalars().all()
+                            
+                            # Convert ORM file models to schema models and add to matches
+                            for file_orm in matching_db_files:
+                                # Skip if we've already seen this file
+                                if file_orm.path in file_paths_seen:
+                                    continue
+                                
+                                file_paths_seen.add(file_orm.path)
+                                
+                                # Convert to FileData
+                                file_data = FileData(
+                                    path=file_orm.path,
+                                    language=file_orm.language,
+                                    size_bytes=file_orm.size_bytes,
+                                    last_modified=file_orm.last_modified,
+                                    is_open=file_orm.is_open,
+                                    is_dirty=file_orm.is_dirty,
+                                )
+                                
+                                # Add content if requested and available
+                                if query.include_content and file_orm.has_content and file_orm.content:
+                                    file_data.content = file_orm.content
+                                
+                                matching_files.append(file_data)
+                
+                except Exception as e:
+                    logger.error("Error querying database for context", error=str(e))
+                    # Continue with in-memory results if DB query fails
             
             # Sort and limit results
             total_matches = len(matching_files)
@@ -616,7 +726,8 @@ class ContextCacheService:
                 "Context query completed",
                 total_matches=total_matches,
                 has_more=has_more,
-                query_time_ms=response.query_time_ms
+                query_time_ms=response.query_time_ms,
+                search_in_db=self.options.enable_db_storage
             )
             
             return response
