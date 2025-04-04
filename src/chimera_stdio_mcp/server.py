@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional
 from mcp import FastMCP
 
 from .registry import registry
+from . import mcp_client
 from chimera_core.utils.logging_config import setup_logging
 from chimera_core.config import get_settings
 from chimera_data.collectors.mcp_collector import MCPDataCollector
@@ -37,19 +38,22 @@ class ChimeraMCP:
         settings = get_settings()
         self.data_collector = MCPDataCollector(enabled=settings.enable_data_collection)
         
+        # For storing the stdout writer for MCP communication
+        self._stdout_writer = None
+        
         if register_tools:
             self._register_tools()
+            
+        # Initialize MCP client with this server instance
+        mcp_client.initialize(self)
     
     def _register_tools(self) -> None:
         """Register built-in tools with the registry."""
-        from .tools.analyze import AnalyzeTool
-        from .tools.context_cache import ContextCacheTool
+        from .tools import ALL_TOOLS
         
-        # Register tools
-        registry.register(AnalyzeTool)
-        registry.register(ContextCacheTool)
-        
-        # More tools will be registered here
+        # Register all tools from the tools package
+        for tool_class in ALL_TOOLS:
+            registry.register(tool_class)
         
         self.log.info(
             "Registered tools with registry",
@@ -133,9 +137,71 @@ class ChimeraMCP:
             
             return error_response
     
+    async def handle_mcp_response(self, response_json: str) -> None:
+        """Handle a response from the client.
+        
+        This method should be called when a JSON-RPC response is received 
+        from the client (typically via stdin).
+        
+        Args:
+            response_json: The JSON-RPC response string
+        """
+        # Pass the response to the MCP client
+        mcp_client.handle_response(response_json)
+    
+    async def _setup_stdio_communication(self) -> None:
+        """Set up communication over stdin/stdout."""
+        # Get stdin/stdout as streams
+        stdin = asyncio.StreamReader()
+        protocol = asyncio.StreamReaderProtocol(stdin)
+        await asyncio.get_event_loop().connect_read_pipe(
+            lambda: protocol, sys.stdin
+        )
+        
+        transport, _ = await asyncio.get_event_loop().connect_write_pipe(
+            asyncio.streams.FlowControlMixin, sys.stdout
+        )
+        self._stdout_writer = asyncio.StreamWriter(
+            transport, protocol, None, asyncio.get_event_loop()
+        )
+        
+        # Override the _write_request function in mcp_client to use our stdout writer
+        async def _write_request_impl(request_json: str) -> None:
+            if self._stdout_writer:
+                self._stdout_writer.write((request_json + "\n").encode())
+                await self._stdout_writer.drain()
+            else:
+                raise RuntimeError("Stdout writer not initialized")
+        
+        # Patch the function in the mcp_client module
+        mcp_client._write_request = _write_request_impl
+        
+        # Start a task to read from stdin
+        asyncio.create_task(self._read_stdin(stdin))
+    
+    async def _read_stdin(self, stdin: asyncio.StreamReader) -> None:
+        """Read JSON-RPC messages from stdin."""
+        while True:
+            line = await stdin.readline()
+            if not line:
+                break
+                
+            line_str = line.decode().strip()
+            if not line_str:
+                continue
+                
+            try:
+                # Handle the response
+                await self.handle_mcp_response(line_str)
+            except Exception as e:
+                self.log.exception("Error handling stdin message", error=str(e))
+    
     async def start(self) -> None:
         """Start the MCP server."""
         self.log.info(f"Starting MCP server on port {self.port}")
+        
+        # Set up stdin/stdout communication
+        await self._setup_stdio_communication()
         
         config = {
             "title": "Project Chimera MCP Server",
