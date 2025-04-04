@@ -283,7 +283,7 @@ class ContextCacheService:
             # Count total unique files
             all_files: Set[str] = set()
             for s in self.recent_snapshots.values():
-                all_files.update(s.files.keys())
+                all_files.update(file.path for file in s.files)
             
             self.stats["total_files"] = len(all_files)
             
@@ -512,48 +512,87 @@ class ContextCacheService:
                 ]
             
             # Collect matching files from all snapshots
-            matching_files: Dict[str, FileData] = {}
+            matching_files: List[FileData] = []
+            file_paths_seen = set()  # To keep track of files we've already added
             
             for snapshot in snapshots_to_search:
-                for file_path, file_data in snapshot.files.items():
-                    # Skip if already matched (prefer more recent snapshots)
-                    if file_path in matching_files:
+                for file_data in snapshot.files:
+                    file_path = file_data.path
+                    
+                    # Skip if we've already added this file
+                    if file_path in file_paths_seen:
                         continue
                     
-                    # Apply file pattern filters
+                    # Check file pattern match
                     if query.file_patterns:
                         if not any(fnmatch(file_path, pattern) for pattern in query.file_patterns):
                             continue
                     
+                    # Check exclude pattern match
                     if query.exclude_patterns:
                         if any(fnmatch(file_path, pattern) for pattern in query.exclude_patterns):
                             continue
                     
-                    # Apply language filter
+                    # Check language match
                     if query.languages and file_data.language:
-                        if file_data.language not in query.languages:
+                        if file_data.language.lower() not in [lang.lower() for lang in query.languages]:
                             continue
                     
-                    # Apply text search if specified
-                    if query.query_text and file_data.content:
-                        if query.query_text.lower() not in file_data.content.lower():
+                    # Check text match if specified
+                    if query.query_text and query.query_text.strip():
+                        query_text = query.query_text.lower()
+                        
+                        # Check file path
+                        path_match = query_text in file_path.lower()
+                        
+                        # Check file content if available
+                        content_match = False
+                        if file_data.content:
+                            content_match = query_text in file_data.content.lower()
+                        
+                        if not (path_match or content_match):
                             continue
+                    
+                    # Add to matches if we get here
+                    file_paths_seen.add(file_path)
                     
                     # Create a copy of the file data
-                    matched_file = file_data.model_copy()
+                    match = FileData(
+                        path=file_data.path,
+                        language=file_data.language,
+                        size_bytes=file_data.size_bytes,
+                        last_modified=file_data.last_modified,
+                        is_open=file_data.is_open,
+                        is_dirty=file_data.is_dirty,
+                    )
                     
-                    # Remove content if not requested
-                    if not query.include_content:
-                        matched_file.content = None
+                    # Add content if requested
+                    if query.include_content and file_data.content:
+                        match.content = file_data.content
                     
-                    matching_files[file_path] = matched_file
+                    matching_files.append(match)
             
-            # Sort matches
-            sorted_matches = list(matching_files.values())
-            
-            # Apply limit if specified
-            total_matches = len(sorted_matches)
+            # Sort and limit results
+            total_matches = len(matching_files)
             has_more = False
+            
+            # Sort by most recent and relevance (if query text)
+            if query.query_text:
+                # Simple relevance: sort by number of matches
+                def relevance_score(file: FileData) -> float:
+                    query_text = query.query_text.lower()
+                    path_score = file.path.lower().count(query_text) * 2.0  # Weight path matches higher
+                    content_score = file.content.lower().count(query_text) if file.content else 0
+                    return path_score + content_score
+                
+                sorted_matches = sorted(matching_files, key=relevance_score, reverse=True)
+            else:
+                # Sort by recent modification time if available
+                sorted_matches = sorted(
+                    matching_files,
+                    key=lambda f: f.last_modified or datetime.min,
+                    reverse=True  # Most recent first
+                )
             
             if query.max_files and total_matches > query.max_files:
                 sorted_matches = sorted_matches[:query.max_files]

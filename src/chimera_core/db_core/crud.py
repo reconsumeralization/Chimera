@@ -471,13 +471,11 @@ async def create_context_snapshot(
         session.add(snapshot_orm)
         
         # Create file records
-        for file_path, file_data in (
-            snapshot.files.items() if isinstance(snapshot.files, dict) else [(f.path, f) for f in snapshot.files]
-        ):
+        for file_data in snapshot.files:
             file_orm = FileDataOrm(
                 id=str(uuid.uuid4()),
                 snapshot_id=snapshot_id,
-                path=file_path,
+                path=file_data.path,
                 language=file_data.language,
                 size_bytes=file_data.size_bytes,
                 last_modified=file_data.last_modified,
@@ -707,7 +705,7 @@ async def convert_snapshot_to_schema(
         ContextSnapshot: The schema snapshot
     """
     # Convert files
-    files = {}
+    files = []
     for file_orm in getattr(snapshot_orm, "files", []):
         file_data = FileData(
             path=file_orm.path,
@@ -718,7 +716,7 @@ async def convert_snapshot_to_schema(
             is_dirty=file_orm.is_dirty,
             content=file_orm.content,
         )
-        files[file_orm.path] = file_data
+        files.append(file_data)
     
     # Convert diagnostics
     diagnostics = []

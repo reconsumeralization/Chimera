@@ -169,18 +169,38 @@ class ContextCacheTool(BaseTool):
         snapshot_data = params["snapshot"]
         
         try:
-            # If snapshot_data is a string, try to parse it as JSON
-            if isinstance(snapshot_data, str):
+            # If snapshot is already a ContextSnapshot, use it directly
+            if isinstance(snapshot_data, ContextSnapshot):
+                snapshot = snapshot_data
+            else:
+                # If snapshot_data is a string, try to parse it as JSON
+                if isinstance(snapshot_data, str):
+                    try:
+                        snapshot_data = json.loads(snapshot_data)
+                    except json.JSONDecodeError:
+                        return {"error": "Invalid JSON in snapshot data"}
+                
+                # Convert files dictionary to list if necessary
+                if (
+                    isinstance(snapshot_data, dict) 
+                    and "files" in snapshot_data 
+                    and isinstance(snapshot_data["files"], dict)
+                ):
+                    # Convert dict of files to list of FileData
+                    files_dict = snapshot_data["files"]
+                    snapshot_data["files"] = [
+                        {
+                            "path": file_path,
+                            **file_data
+                        } if isinstance(file_data, dict) and "path" not in file_data else file_data
+                        for file_path, file_data in files_dict.items()
+                    ]
+                
+                # Create ContextSnapshot from the data
                 try:
-                    snapshot_data = json.loads(snapshot_data)
-                except json.JSONDecodeError:
-                    return {"error": "Invalid JSON in snapshot data"}
-            
-            # Create ContextSnapshot from the data
-            try:
-                snapshot = ContextSnapshot.model_validate(snapshot_data)
-            except Exception as e:
-                return {"error": f"Invalid snapshot data: {str(e)}"}
+                    snapshot = ContextSnapshot.model_validate(snapshot_data)
+                except Exception as e:
+                    return {"error": f"Invalid snapshot data: {str(e)}"}
             
             # Store the snapshot
             snapshot_id = await context_cache.store_snapshot(snapshot)
