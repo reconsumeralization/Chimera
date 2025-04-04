@@ -14,7 +14,8 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 # Import our models
 from src.chimera_core.db_core.base import Base
-from src.chimera_core.db_core.models import SettingOrm, SnapshotLogOrm, RuleSetOrm, RuleOrm
+# Import all models from models.py to ensure they are registered with Base.metadata
+from src.chimera_core.db_core import models 
 from src.chimera_core.config import get_settings
 
 # This is the Alembic Config object, which provides

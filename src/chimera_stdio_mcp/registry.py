@@ -57,8 +57,18 @@ class ToolRegistry:
         
         # Create instance if not already created
         if tool_name not in self._instances:
-            self._instances[tool_name] = self._tools[tool_name]()
-            self.log.debug(f"Created instance of tool {tool_name}")
+            tool_class = self._tools[tool_name]
+            
+            # Handle special case for FileManagerTool
+            if tool_name == "fileManager":
+                # Get workspace path from environment or use current directory
+                from chimera_core.config import get_settings
+                workspace_path = get_settings().workspace_path
+                self._instances[tool_name] = tool_class(base_path=workspace_path)
+                self.log.debug(f"Created instance of FileManagerTool with base_path: {workspace_path}")
+            else:
+                self._instances[tool_name] = tool_class()
+                self.log.debug(f"Created instance of tool {tool_name}")
         
         return self._instances[tool_name]
     
@@ -71,7 +81,16 @@ class ToolRegistry:
         # Ensure all tools are instantiated
         for tool_name, tool_class in self._tools.items():
             if tool_name not in self._instances:
-                self._instances[tool_name] = tool_class()
+                # Handle special case for FileManagerTool
+                if tool_name == "fileManager":
+                    # Get workspace path from environment or use current directory
+                    from chimera_core.config import get_settings
+                    workspace_path = get_settings().workspace_path
+                    self._instances[tool_name] = tool_class(base_path=workspace_path)
+                    self.log.debug(f"Created instance of FileManagerTool with base_path: {workspace_path}")
+                else:
+                    self._instances[tool_name] = tool_class()
+                    self.log.debug(f"Created instance of tool {tool_name}")
         
         return list(self._instances.values())
     

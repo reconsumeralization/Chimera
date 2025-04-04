@@ -25,6 +25,7 @@ class ChimeraSettings(BaseSettings):
     # Path settings
     BASE_DIR: str = str(Path(__file__).parent.parent.parent.absolute())
     DATA_DIRECTORY: str = Field(default="./data")
+    WORKSPACE_PATH: str = Field(default=str(Path.cwd()))
     
     # Server settings
     HOST: str = Field(default="127.0.0.1")
@@ -44,6 +45,15 @@ class ChimeraSettings(BaseSettings):
     # Database settings
     DATABASE_URL: str = Field(default="sqlite+aiosqlite:///./data/chimera.db")
     DATABASE_ECHO: bool = Field(default=False)
+    
+    # MCP settings
+    MCP_SERVER_HOST: str = Field(default="127.0.0.1", alias="mcp_server_host")
+    ENABLE_DATA_COLLECTION: bool = Field(default=False, alias="enable_data_collection")
+    
+    @property
+    def workspace_path(self) -> str:
+        """Get the workspace path with camelCase naming for compatibility."""
+        return self.WORKSPACE_PATH
     
     @field_validator("DATA_DIRECTORY")
     def validate_data_directory(cls, v: str) -> str:

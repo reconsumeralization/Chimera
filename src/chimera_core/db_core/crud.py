@@ -7,7 +7,7 @@ including creating, reading, updating, and deleting records.
 import datetime
 import uuid
 from datetime import timedelta
-from typing import Any, Dict, List, Optional, Type, TypeVar, Generic, Union, cast
+from typing import Any, Dict, List, Optional, Type, TypeVar, Generic, Union, cast, Sequence
 
 import structlog
 from sqlalchemy import func, select, delete, desc, or_, text, update
@@ -18,6 +18,14 @@ from sqlmodel import Session as SQLModelSession, select
 from src.chimera_core.db_core.models import SettingOrm, SnapshotLogOrm, RuleSetOrm, RuleOrm, ContextSnapshotOrm, DiagnosticItemOrm, FileDataOrm
 from src.chimera_core.exceptions import DatabaseError, NotFoundError
 from src.schemas.context import ContextSnapshot, FileData, DiagnosticItem
+from src.schemas.context_schemas import (
+    SnapshotLogCreate,
+    ContextSnapshotCreate, 
+    FileDataCreate, 
+    DiagnosticItemCreate
+)
+from src.schemas.rule_schemas import RuleSetCreate, RuleCreate
+from src.schemas.settings_schemas import SettingsCreate, SettingsUpdate
 
 logger = structlog.get_logger(__name__)
 
@@ -740,4 +748,163 @@ async def convert_snapshot_to_schema(
         files=files,
         diagnostics=diagnostics,
         metadata=snapshot_orm.meta_data or {},
-    ) 
+    )
+
+
+# --- Generic CRUD Operations ---
+
+async def get[ModelType](db: AsyncSession, model_id: uuid.UUID, model_class: Type[ModelType]) -> Optional[ModelType]:
+    """Get a single model instance by ID."""
+    result = await db.execute(select(model_class).filter(model_class.id == model_id))
+    return result.scalars().first()
+
+async def get_all[ModelType](db: AsyncSession, model_class: Type[ModelType], skip: int = 0, limit: int = 100) -> Sequence[ModelType]:
+    """Get multiple model instances with pagination."""
+    result = await db.execute(select(model_class).offset(skip).limit(limit))
+    return result.scalars().all()
+
+async def create[ModelType, CreateSchemaType](db: AsyncSession, obj_in: CreateSchemaType, model_class: Type[ModelType]) -> ModelType:
+    """Create a new model instance."""
+    db_obj = model_class(**obj_in.model_dump())
+    db.add(db_obj)
+    await db.commit()
+    await db.refresh(db_obj)
+    return db_obj
+
+# --- SnapshotLog CRUD ---
+
+async def create_snapshot_log(db: AsyncSession, log_in: SnapshotLogCreate) -> SnapshotLogOrm:
+    log_dict = log_in.model_dump(exclude_unset=True)
+    # We don't create the nested snapshot here, it will be linked later
+    log_dict.pop('context_snapshot', None)
+    db_log = SnapshotLogOrm(**log_dict)
+    db.add(db_log)
+    await db.commit()
+    await db.refresh(db_log)
+    return db_log
+
+async def get_snapshot_log(db: AsyncSession, log_id: uuid.UUID) -> Optional[SnapshotLogOrm]:
+    return await get(db, log_id, SnapshotLogOrm)
+
+async def get_snapshot_logs(db: AsyncSession, skip: int = 0, limit: int = 100) -> Sequence[SnapshotLogOrm]:
+    return await get_all(db, SnapshotLogOrm, skip=skip, limit=limit)
+
+# --- ContextSnapshot CRUD ---
+
+async def create_context_snapshot(db: AsyncSession, snapshot_in: ContextSnapshotCreate, log_id: uuid.UUID) -> ContextSnapshotOrm:
+    snapshot_dict = snapshot_in.model_dump(exclude={'files', 'diagnostics'})
+    snapshot_dict['log_id'] = log_id
+    db_snapshot = ContextSnapshotOrm(**snapshot_dict)
+    db.add(db_snapshot)
+    # We need the snapshot ID before creating nested files/diagnostics
+    await db.flush() 
+    await db.refresh(db_snapshot)
+
+    # Create related files
+    if snapshot_in.files:
+        for file_in in snapshot_in.files:
+            await create_file_data(db, file_in, snapshot_id=db_snapshot.id)
+            
+    # Create related diagnostics
+    if snapshot_in.diagnostics:
+        for diag_in in snapshot_in.diagnostics:
+            await create_diagnostic_item(db, diag_in, snapshot_id=db_snapshot.id)
+            
+    await db.commit()
+    await db.refresh(db_snapshot) # Refresh again to load relationships
+    return db_snapshot
+
+async def get_context_snapshot(db: AsyncSession, snapshot_id: uuid.UUID) -> Optional[ContextSnapshotOrm]:
+    # Potentially use joinedload or selectinload for relationships if needed frequently
+    result = await db.execute(
+        select(ContextSnapshotOrm)
+        .options(relationship('files'), relationship('diagnostics'))
+        .filter(ContextSnapshotOrm.id == snapshot_id)
+    )
+    return result.scalars().first()
+
+async def get_context_snapshots(db: AsyncSession, skip: int = 0, limit: int = 100) -> Sequence[ContextSnapshotOrm]:
+    return await get_all(db, ContextSnapshotOrm, skip=skip, limit=limit)
+
+
+# --- FileData CRUD ---
+
+async def create_file_data(db: AsyncSession, file_in: FileDataCreate, snapshot_id: uuid.UUID) -> FileDataOrm:
+    db_file = FileDataOrm(**file_in.model_dump(), snapshot_id=snapshot_id)
+    db.add(db_file)
+    # Commit happens at the end of create_context_snapshot
+    return db_file
+
+# --- DiagnosticItem CRUD ---
+
+async def create_diagnostic_item(db: AsyncSession, diag_in: DiagnosticItemCreate, snapshot_id: uuid.UUID) -> DiagnosticItemOrm:
+    db_diag = DiagnosticItemOrm(**diag_in.model_dump(), snapshot_id=snapshot_id)
+    db.add(db_diag)
+    # Commit happens at the end of create_context_snapshot
+    return db_diag
+
+# --- RuleSet CRUD ---
+
+async def create_rule_set(db: AsyncSession, ruleset_in: RuleSetCreate) -> RuleSetOrm:
+    return await create(db, ruleset_in, RuleSetOrm)
+
+async def get_rule_set(db: AsyncSession, ruleset_id: uuid.UUID) -> Optional[RuleSetOrm]:
+    return await get(db, ruleset_id, RuleSetOrm)
+
+async def get_rule_set_by_name(db: AsyncSession, name: str) -> Optional[RuleSetOrm]:
+    result = await db.execute(select(RuleSetOrm).filter(RuleSetOrm.name == name))
+    return result.scalars().first()
+
+async def get_rule_sets(db: AsyncSession, skip: int = 0, limit: int = 100) -> Sequence[RuleSetOrm]:
+    return await get_all(db, RuleSetOrm, skip=skip, limit=limit)
+
+# --- Rule CRUD ---
+
+async def create_rule(db: AsyncSession, rule_in: RuleCreate, rule_set_id: uuid.UUID) -> RuleOrm:
+    db_rule = RuleOrm(**rule_in.model_dump(), rule_set_id=rule_set_id)
+    db.add(db_rule)
+    await db.commit()
+    await db.refresh(db_rule)
+    return db_rule
+
+async def get_rule(db: AsyncSession, rule_id: uuid.UUID) -> Optional[RuleOrm]:
+    return await get(db, rule_id, RuleOrm)
+
+async def get_rules_by_ruleset(db: AsyncSession, rule_set_id: uuid.UUID, skip: int = 0, limit: int = 1000) -> Sequence[RuleOrm]:
+    result = await db.execute(
+        select(RuleOrm)
+        .filter(RuleOrm.rule_set_id == rule_set_id)
+        .offset(skip)
+        .limit(limit)
+    )
+    return result.scalars().all()
+
+# --- Settings CRUD ---
+
+async def get_setting(db: AsyncSession, key: str) -> Optional[SettingOrm]:
+    result = await db.execute(select(SettingOrm).filter(SettingOrm.key == key))
+    return result.scalars().first()
+
+async def get_settings(db: AsyncSession, skip: int = 0, limit: int = 100) -> Sequence[SettingOrm]:
+    return await get_all(db, SettingOrm, skip=skip, limit=limit)
+
+async def create_setting(db: AsyncSession, setting_in: SettingsCreate) -> SettingOrm:
+    return await create(db, setting_in, SettingOrm)
+
+async def update_setting(db: AsyncSession, key: str, setting_in: SettingsUpdate) -> Optional[SettingOrm]:
+    db_setting = await get_setting(db, key)
+    if db_setting:
+        update_data = setting_in.model_dump(exclude_unset=True)
+        for field, value in update_data.items():
+            setattr(db_setting, field, value)
+        await db.commit()
+        await db.refresh(db_setting)
+    return db_setting
+
+async def delete_setting(db: AsyncSession, key: str) -> bool:
+    db_setting = await get_setting(db, key)
+    if db_setting:
+        await db.delete(db_setting)
+        await db.commit()
+        return True
+    return False 

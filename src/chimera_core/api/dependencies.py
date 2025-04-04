@@ -7,7 +7,7 @@ and authentication.
 from typing import Annotated, Optional
 
 import structlog
-from fastapi import Depends, HTTPException, Security, status
+from fastapi import Depends, HTTPException, Security, status, Request
 from fastapi.security import APIKeyHeader
 
 from src.chimera_core.config import get_settings
@@ -17,6 +17,8 @@ from src.chimera_core.services.database import DatabaseService
 from src.chimera_core.services.prompt_service import PromptService
 from src.chimera_core.services.rule_engine import RuleEngineService
 from src.chimera_core.services.service_factory import ServiceFactory
+from src.chimera_core.services.telemetry_service import TelemetryService
+from src.chimera_core.db_core.base import AsyncSession, get_db_session
 
 logger = structlog.get_logger(__name__)
 
@@ -169,4 +171,62 @@ ContextService = ContextCacheService
 PromptService = PromptService
 AIService = AIClient
 RuleService = RuleEngineService
-APIKey = Annotated[bool, Depends(verify_api_key)] 
+APIKey = Annotated[bool, Depends(verify_api_key)]
+
+# --- Service Factory Dependency ---
+
+def get_service_factory(request: Request) -> ServiceFactory:
+    """Get the service factory instance from the application state."""
+    if not hasattr(request.app.state, 'service_factory') or not request.app.state.service_factory:
+        logger.error("Service factory not initialized or found in app state.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error: Services not available."
+        )
+    return request.app.state.service_factory
+
+# --- Individual Service Dependencies ---
+
+async def get_context_service(
+    factory: Annotated[ServiceFactory, Depends(get_service_factory)]
+) -> ContextCacheService:
+    """Dependency to get the ContextCacheService."""
+    return factory.get_context_cache_service()
+
+async def get_rule_engine_service(
+    factory: Annotated[ServiceFactory, Depends(get_service_factory)]
+) -> RuleEngineService:
+    """Dependency to get the RuleEngineService."""
+    return factory.get_rule_engine_service()
+
+async def get_ai_client_service(
+    factory: Annotated[ServiceFactory, Depends(get_service_factory)]
+) -> AIClient:
+    """Dependency to get the AIClientService."""
+    return factory.get_ai_client()
+
+async def get_database_service(
+    factory: Annotated[ServiceFactory, Depends(get_service_factory)]
+) -> DatabaseService:
+    """Dependency to get the DatabaseService."""
+    return factory.get_database_service()
+
+async def get_telemetry_service(
+    factory: Annotated[ServiceFactory, Depends(get_service_factory)]
+) -> TelemetryService:
+    """Dependency to get the TelemetryService."""
+    return factory.get_telemetry_service()
+
+# --- Database Session Dependency ---
+
+# Re-export get_db_session for convenience
+DbSessionDep = Annotated[AsyncSession, Depends(get_db_session)]
+
+# --- Type Aliases for Dependencies ---
+# These can be used directly in route function signatures
+
+ContextServiceDep = Annotated[ContextCacheService, Depends(get_context_service)]
+RuleEngineServiceDep = Annotated[RuleEngineService, Depends(get_rule_engine_service)]
+AIServiceDep = Annotated[AIClient, Depends(get_ai_client_service)]
+DBServiceDep = Annotated[DatabaseService, Depends(get_database_service)]
+TelemetryServiceDep = Annotated[TelemetryService, Depends(get_telemetry_service)] 
