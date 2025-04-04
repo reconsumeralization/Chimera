@@ -1,25 +1,27 @@
-"""MCP tools for Project Chimera."""
-from typing import List, Type
+"""Tools for Project Chimera MCP."""
 
-from .base import BaseTool
-from .analyze import AnalyzeTool
 from .context_cache import ContextCacheTool
-from .sampling import SamplingTool
+from .database import DatabaseQueryTool
+from .ai_code import CodeGenerationTool, CodeAnalysisTool
 from .gemini import GeminiTool
+from .file_manager import FileManagerTool
 
-# List of all tool classes
-ALL_TOOLS: List[Type[BaseTool]] = [
-    AnalyzeTool,
+# List all available tools
+ALL_TOOLS = [
     ContextCacheTool,
-    SamplingTool,
+    DatabaseQueryTool,
+    CodeGenerationTool,
+    CodeAnalysisTool,
     GeminiTool,
+    FileManagerTool,
 ]
 
+# Export tool classes
 __all__ = [
-    "BaseTool",
-    "AnalyzeTool",
     "ContextCacheTool",
-    "SamplingTool",
+    "DatabaseQueryTool",
+    "CodeGenerationTool",
+    "CodeAnalysisTool",
     "GeminiTool",
-    "ALL_TOOLS",
+    "FileManagerTool",
 ] 
