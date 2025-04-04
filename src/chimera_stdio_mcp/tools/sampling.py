@@ -1,9 +1,12 @@
 """Sampling tool for requesting LLM completions through MCP."""
 import json
 import structlog
+import asyncio
 from typing import Any, Dict, List, Optional, Literal, Union
+import time
 
 from .base import BaseTool
+from ..mcp_client import send_request, MCPError
 
 logger = structlog.get_logger(__name__)
 
@@ -53,8 +56,17 @@ class SamplingTool(BaseTool):
             if not self._validate_messages(messages):
                 return {"error": "Invalid message format"}
             
-            # Create completion request
-            request = self._create_sampling_request(params)
+            # Parse operation from parameters (default to createMessage)
+            operation = params.get("operation", "createMessage")
+            if not operation:
+                operation = "createMessage"
+                
+            if operation not in ["createMessage"]:
+                return {"error": f"Unsupported sampling operation: {operation}"}
+            
+            # Create MCP request
+            mcp_method = f"sampling/{operation}"
+            mcp_params = self._create_sampling_request(params)
             
             # Log the request (excluding potentially sensitive content)
             self.log.info(
@@ -62,26 +74,44 @@ class SamplingTool(BaseTool):
                 message_count=len(messages),
                 max_tokens=params.get("maxTokens"),
                 include_context=params.get("includeContext", "none"),
-                has_system_prompt=bool(params.get("systemPrompt"))
+                has_system_prompt=bool(params.get("systemPrompt")),
+                operation=operation
             )
             
-            # Here we would normally send the request to the client
-            # For now, we'll return a stub response indicating the request format is valid
-            # but the actual sampling functionality is not yet implemented
-            return {
-                "status": "not_implemented",
-                "message": "The sampling tool is correctly configured but not yet fully implemented",
-                "request_format_valid": True,
-                "expected_response": {
-                    "model": "(model name)",
-                    "stopReason": "endTurn",
-                    "role": "assistant",
-                    "content": {
-                        "type": "text",
-                        "text": "(LLM completion would appear here)"
-                    }
-                }
-            }
+            start_time = time.time()
+            
+            try:
+                # Send request to client and wait for response
+                response = await send_request(mcp_method, mcp_params)
+                
+                # Log successful completion
+                elapsed_time = time.time() - start_time
+                self.log.info(
+                    "LLM completion received",
+                    elapsed_time_ms=int(elapsed_time * 1000),
+                    model=response.get("model", "unknown"),
+                    stop_reason=response.get("stopReason", "unknown")
+                )
+                
+                return response
+                
+            except MCPError as e:
+                # Handle MCP-specific errors
+                error_msg = f"MCP error during sampling: {str(e)}"
+                self.log.error(error_msg, error_code=getattr(e, "code", None))
+                return {"error": error_msg, "mcp_error": True, "code": getattr(e, "code", None)}
+                
+            except asyncio.TimeoutError:
+                # Handle timeout
+                error_msg = "Timeout waiting for LLM completion"
+                self.log.error(error_msg, timeout_ms=int((time.time() - start_time) * 1000))
+                return {"error": error_msg, "timeout": True}
+                
+            except Exception as e:
+                # Handle other errors during MCP communication
+                error_msg = f"Error communicating with client: {str(e)}"
+                self.log.error(error_msg)
+                return {"error": error_msg}
         
         except Exception as e:
             self.log.exception("Error executing sampling operation", error=str(e))

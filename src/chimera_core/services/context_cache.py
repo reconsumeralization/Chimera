@@ -185,7 +185,7 @@ class ContextCacheService:
             # Define the async function to do the loading
             async def _load_snapshots():
                 async with connection.get_db_session() as session:
-                    # Get the most recent snapshots up to max_snapshots
+                # Get the most recent snapshots up to max_snapshots
                     snapshots = await crud.get_recent_context_snapshots(
                         session=session,
                         limit=self.options.max_snapshots,

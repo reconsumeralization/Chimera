@@ -3,6 +3,7 @@ import json
 import asyncio
 import structlog
 import uuid
+import sys
 from typing import Any, Dict, Optional
 
 logger = structlog.get_logger(__name__)
@@ -97,15 +98,9 @@ async def _write_request(request_json: str) -> None:
     Args:
         request_json: Serialized JSON-RPC request
     """
-    # In a real implementation, this would write to stdout or other channel
-    # For example:
-    # print(request_json, flush=True)
-    
-    # For now, raise an error indicating this needs to be implemented
-    raise NotImplementedError(
-        "The _write_request function must be implemented to match the "
-        "specific communication channel used by the MCP implementation."
-    )
+    # Write to stdout with a newline
+    sys.stdout.write(request_json + "\n")
+    sys.stdout.flush()
 
 def handle_response(response_json: str) -> None:
     """
@@ -175,7 +170,6 @@ def initialize(server_instance: Any) -> None:
         server_instance: The ChimeraMCP server instance or other object
                          providing access to the communication channel
     """
-    # Implementation depends on the specifics of the server class
-    # This function would typically store a reference to the server and
-    # customize the _write_request function to use the server's communication channel
-    pass 
+    # No need to store a reference to the server,
+    # just make sure _write_request is properly implemented
+    logger.info("MCP client initialized") 
