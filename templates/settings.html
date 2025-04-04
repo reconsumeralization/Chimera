@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Enhanced Developer's Toolkit</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Enhanced Developer's Toolkit</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/tools">Tools</a></li>
+                    <li><a href="/settings" class="active">Settings</a></li>
+                    <li><a href="/logs">Logs</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <main>
+            <section class="settings-section">
+                <h2>Data Collection Settings</h2>
+                <div class="settings-card">
+                    <div class="setting-item">
+                        <div class="setting-header">
+                            <h3>AI Training Data Collection</h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="data-collection-toggle" {% if data_collection_enabled %}checked{% endif %}>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <p class="setting-description">
+                            When enabled, the system collects anonymized data about MCP usage, code snapshots, and user interactions. 
+                            This data helps improve AI models and enhance the toolkit's capabilities.
+                        </p>
+                    </div>
+                    
+                    <div class="data-collection-stats" id="data-collection-stats">
+                        {% if statistics %}
+                        <h4>Collection Statistics</h4>
+                        <ul>
+                            <li>Requests: <span id="request-count">{{ statistics.request_count }}</span></li>
+                            <li>Responses: <span id="response-count">{{ statistics.response_count }}</span></li>
+                            <li>Code Snapshots: <span id="snapshot-count">{{ statistics.snapshot_count }}</span></li>
+                            <li>User Interactions: <span id="interaction-count">{{ statistics.interaction_count }}</span></li>
+                            <li>Database Size: <span id="database-size">{{ statistics.database_size_mb }}</span> MB</li>
+                        </ul>
+                        
+                        {% if statistics.tool_usage %}
+                        <h4>Tool Usage</h4>
+                        <div class="tool-usage-list">
+                            {% for tool, count in statistics.tool_usage.items() %}
+                            <div class="tool-usage-item">
+                                <span class="tool-name">{{ tool }}</span>
+                                <span class="tool-count">{{ count }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <p>No data collection statistics available.</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="setting-actions">
+                        <button id="export-data-btn" class="action-button">Export Collected Data</button>
+                    </div>
+                </div>
+                
+                <div class="settings-card">
+                    <h3>Data Collection Privacy Information</h3>
+                    <div class="privacy-info">
+                        <p>The Enhanced Developer's Toolkit only collects data when explicitly enabled by you. Here's what you should know:</p>
+                        <ul>
+                            <li><strong>What we collect:</strong> MCP tool usage, anonymized code samples, and user interaction patterns.</li>
+                            <li><strong>Anonymization:</strong> Sensitive data like API keys, passwords, and personal information is automatically redacted.</li>
+                            <li><strong>Data storage:</strong> All data is stored locally on your machine in the data directory.</li>
+                            <li><strong>Your control:</strong> You can disable collection anytime, export your data, or delete it completely.</li>
+                        </ul>
+                        <p>This data helps us improve the AI capabilities and user experience of the toolkit. We appreciate your contribution!</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>&copy; 2023 Enhanced Developer's Toolkit</p>
+        </footer>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dataCollectionToggle = document.getElementById('data-collection-toggle');
+            const exportDataBtn = document.getElementById('export-data-btn');
+            
+            // Handle toggle change
+            dataCollectionToggle.addEventListener('change', function() {
+                const enabled = this.checked;
+                
+                fetch('/api/settings/data-collection', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ enabled: enabled })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        showNotification(`Data collection ${enabled ? 'enabled' : 'disabled'}`);
+                    } else {
+                        showNotification('Error updating settings', 'error');
+                        // Revert toggle if there was an error
+                        dataCollectionToggle.checked = !enabled;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error updating settings', 'error');
+                    // Revert toggle if there was an error
+                    dataCollectionToggle.checked = !enabled;
+                });
+            });
+            
+            // Handle export button click
+            exportDataBtn.addEventListener('click', function() {
+                showNotification('Exporting data...', 'info');
+                
+                fetch('/api/settings/export-data', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        showNotification(`Data exported to ${data.output_dir}`);
+                    } else {
+                        showNotification('Error exporting data', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error exporting data', 'error');
+                });
+            });
+            
+            // Function to show notification
+            function showNotification(message, type = 'success') {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                // Show notification
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 10);
+                
+                // Hide and remove after 3 seconds
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 300);
+                }, 3000);
+            }
+            
+            // Periodically refresh statistics
+            function refreshStats() {
+                fetch('/api/settings/data-collection')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success' && data.statistics) {
+                        const stats = data.statistics;
+                        document.getElementById('request-count').textContent = stats.request_count;
+                        document.getElementById('response-count').textContent = stats.response_count;
+                        document.getElementById('snapshot-count').textContent = stats.snapshot_count;
+                        document.getElementById('interaction-count').textContent = stats.interaction_count;
+                        document.getElementById('database-size').textContent = stats.database_size_mb;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error refreshing stats:', error);
+                });
+            }
+            
+            // Refresh stats every 30 seconds
+            setInterval(refreshStats, 30000);
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git - Developer's Toolkit</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --card-bg: #ffffff;
+            --border-color: #dee2e6;
+            --git-added: #28a745;
+            --git-modified: #ffc107;
+            --git-deleted: #dc3545;
+            --git-untracked: #6c757d;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #212529;
+            --text-color: #f8f9fa;
+            --card-bg: #2c3034;
+            --border-color: #495057;
+            --git-added: #28a745;
+            --git-modified: #ffc107;
+            --git-deleted: #dc3545;
+            --git-untracked: #6c757d;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .navbar {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .git-status {
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        .git-added {
+            color: var(--git-added);
+        }
+
+        .git-modified {
+            color: var(--git-modified);
+        }
+
+        .git-deleted {
+            color: var(--git-deleted);
+        }
+
+        .git-untracked {
+            color: var(--git-untracked);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Developer's Toolkit</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/code-analysis">Code Analysis</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/terminal">Terminal</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/git">Git</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/settings">Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Git Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="git-status">
+                            <p>On branch <strong>main</strong></p>
+                            <p>Your branch is up to date with 'origin/main'.</p>
+                            <p>Changes to be committed:</p>
+                            <ul class="list-unstyled">
+                                <li class="git-added"><i class="bi bi-plus-circle"></i> new file: templates/dashboard.html</li>
+                                <li class="git-added"><i class="bi bi-plus-circle"></i> new file: templates/code_analysis.html</li>
+                                <li class="git-added"><i class="bi bi-plus-circle"></i> new file: templates/terminal.html</li>
+                            </ul>
+                            <p>Changes not staged for commit:</p>
+                            <ul class="list-unstyled">
+                                <li class="git-modified"><i class="bi bi-pencil"></i> modified: main.py</li>
+                                <li class="git-deleted"><i class="bi bi-trash"></i> deleted: web_server.py</li>
+                            </ul>
+                            <p>Untracked files:</p>
+                            <ul class="list-unstyled">
+                                <li class="git-untracked"><i class="bi bi-question-circle"></i> templates/git.html</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Commit</h5>
+                    </div>
+                    <div class="card-body">
+                        <form>
+                            <div class="mb-3">
+                                <label for="commitMessage" class="form-label">Commit Message</label>
+                                <textarea class="form-control" id="commitMessage" rows="3" placeholder="Enter your commit message..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Commit Changes</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">MCP Connection</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Connection URL:</strong> http://localhost:8000</p>
+                        <p><strong>CLI Command:</strong> mcp --url http://localhost:8000</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn btn-outline-secondary theme-toggle" onclick="toggleTheme()">
+        <i class="bi bi-moon-stars"></i>
+    </button>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+    </script>
+</body>
+</html> 

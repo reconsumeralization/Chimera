@@ -1,0 +1,181 @@
+/* 
+ * Notification System Styles
+ * Provides styling for toast notifications
+ */
+
+/* Notification container */
+.notification-container {
+    position: fixed;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    padding: 1rem;
+    pointer-events: none; /* Allow clicks to pass through container */
+}
+
+/* Container positioning */
+.notification-container.top-right {
+    top: 0;
+    right: 0;
+}
+
+.notification-container.top-left {
+    top: 0;
+    left: 0;
+}
+
+.notification-container.bottom-right {
+    bottom: 0;
+    right: 0;
+}
+
+.notification-container.bottom-left {
+    bottom: 0;
+    left: 0;
+}
+
+/* Individual notification */
+.notification {
+    display: flex;
+    align-items: flex-start;
+    background: var(--bg-color, #ffffff);
+    border-left: 4px solid var(--accent-color, #3b82f6);
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+    max-width: 400px;
+    min-width: 300px;
+    opacity: 0.98;
+    overflow: hidden;
+    padding: 1rem;
+    pointer-events: auto; /* Make notification clickable */
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* Notification types */
+.notification-info {
+    --accent-color: #3b82f6; /* Blue */
+}
+
+.notification-success {
+    --accent-color: #10b981; /* Green */
+}
+
+.notification-warning {
+    --accent-color: #f59e0b; /* Yellow */
+}
+
+.notification-error {
+    --accent-color: #ef4444; /* Red */
+}
+
+/* Notification icon */
+.notification-icon {
+    flex-shrink: 0;
+    margin-right: 0.75rem;
+    opacity: 0.8;
+}
+
+.notification-icon i {
+    font-size: 1.25rem;
+    color: var(--accent-color, #3b82f6);
+}
+
+/* Notification content */
+.notification-content {
+    flex-grow: 1;
+    margin-right: 1.5rem;
+}
+
+.notification-message {
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Close button */
+.notification-close {
+    background: transparent;
+    border: none;
+    color: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    font-size: 1.25rem;
+    line-height: 1;
+    padding: 0;
+    position: absolute;
+    right: 0.5rem;
+    top: 0.5rem;
+    transition: color 0.2s;
+}
+
+.notification-close:hover {
+    color: rgba(0, 0, 0, 0.8);
+}
+
+/* Progress bar */
+.notification-progress {
+    background: var(--accent-color, #3b82f6);
+    bottom: 0;
+    height: 3px;
+    left: 0;
+    opacity: 0.7;
+    position: absolute;
+    width: 100%;
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .notification {
+    background-color: #1e2a38;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .notification-close {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+[data-theme="dark"] .notification-close:hover {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Mad scientist theme overrides */
+[data-theme="dark"] .mad-scientist-mode .notification {
+    background-color: rgba(10, 20, 30, 0.9);
+    border-left-width: 2px;
+    box-shadow: 0 0 15px var(--accent-glow, rgba(57, 255, 20, 0.6));
+}
+
+[data-theme="dark"] .mad-scientist-mode .notification-icon i {
+    text-shadow: 0 0 5px var(--accent-color, #39ff14);
+}
+
+/* Animation overrides for notifications */
+.notification.animate__fadeIn {
+    animation-duration: 0.3s;
+}
+
+.notification.animate__fadeOut {
+    animation-duration: 0.5s;
+}
+
+/* Add transition for hovering */
+.notification:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 480px) {
+    .notification-container {
+        padding: 0.5rem;
+        width: 100%;
+    }
+    
+    .notification {
+        max-width: 100%;
+        min-width: auto;
+        width: 100%;
+    }
+} 

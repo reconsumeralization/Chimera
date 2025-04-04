@@ -1,43 +1,85 @@
-<h1 align="center">Hi 👋, I'm Mpc</h1>
-<h3 align="center">A passionate backend developer from Spain</h3>
+# Project Chimera
 
-<p align="left"> <img src="https://komarev.com/ghpvc/?username=mpc" alt="mpc" /> </p>
+Project Chimera is a context-aware AI coding assistant that provides intelligent code generation, explanation, and analysis by understanding your project's context.
 
-- 🔭 I’m currently working on [Industrias I](https://industriasi.com/)
+## Features
 
-- 🌱 I’m currently learning **React**
+- **Context-Aware AI**: Chimera understands your code in context, providing more relevant assistance.
+- **Code Generation**: Generate code snippets, functions, or entire components with context-aware assistance.
+- **Code Explanation**: Get detailed or brief explanations of any code snippet or function.
+- **Code Analysis**: Identify potential issues, bugs, and improvement opportunities.
+- **Test Generation**: Automatically generate comprehensive test cases for your functions.
+- **Rule Engine**: Define custom rules to automate repetitive tasks and enforce coding standards.
 
-- 👯 I’m looking to collaborate on [WordPress](https://wordpress.org/)
+## Getting Started
 
-- 🤝 I’m looking for help with [WordPress](https://wordpress.org/)
+### Prerequisites
 
-- 👨‍💻 All of my projects are available at [https://github.com/mpc?tab=repositories](https://github.com/mpc?tab=repositories)
+- Python 3.9+
+- pip for package installation
+- OpenAI API key or other supported LLM provider keys
 
-- 📝 I regulary write articles on [https://potencia.pro/](https://potencia.pro/)
+### Installation
 
-- 💬 Ask me about **WordPress**
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/project-chimera.git
+   cd project-chimera
+   ```
 
-- 📫 How to reach me **mariano@industriasi.com**
+2. Create a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
-- ⚡ Fun fact **Reader of everything written**
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-### Blogs posts
-<!-- BLOG-POST-LIST:START -->
-<!-- BLOG-POST-LIST:END -->
+4. Set up configuration:
+   ```bash
+   cp .env.sample .env
+   ```
+   Edit the `.env` file with your settings, especially your AI provider API key.
 
-<p align="left"><img src="https://devicons.github.io/devicon/devicon.git/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" alt="aws" width="40" height="40"/> <img src="https://www.vectorlogo.zone/logos/microsoft_azure/microsoft_azure-icon.svg" alt="azure" width="40" height="40"/> <img src="https://www.vectorlogo.zone/logos/babeljs/babeljs-icon.svg" alt="babel" width="40" height="40"/> <img src="https://www.vectorlogo.zone/logos/gnu_bash/gnu_bash-icon.svg" alt="bash" width="40" height="40"/> <img src="https://devicons.github.io/devicon/devicon.git/icons/bootstrap/bootstrap-plain.svg" alt="bootstrap" width="40" height="40"/> <img src="https://devicons.github.io/devicon/devicon.git/icons/css3/css3-original-wordmark.svg" alt="css3" width="40" height="40"/> <img src="https://devicons.github.io/devicon/devicon.git/icons/d3js/d3js-original.svg" alt="d3js" width="40" height="40"/> <img src="https://devicons.github.io/devicon/devicon.git/icons/docker/docker-original-wordmark.svg" alt="docker" width="40" height="40"/> <img src="https://devicons.github.io/devicon/devicon.git/icons/electron/electron-original.svg" alt="electron" width="40" height="40"/> <img src="https://www.vectorlogo.zone/logos/figma/figma-icon.svg" alt="figma" width="40" height="40"/> <img src="https://www.vectorlogo.zone/logos/firebase/firebase-icon.svg" alt="firebase" width="40" height="40"/> <img src="https://www.vectorlogo.zone/logos/gatsbyjs/gatsbyjs-icon.svg" alt="gatsby" width="40" height="40"/> <img src="https://www.vectorlogo.zone/logos/google_cloud/google_cloud-icon.svg" alt="gcp" width="40" height="40"/> <img src="https://www.vectorlogo.zone/logos/git-scm/git-scm-icon.svg" alt="git" width="40" height="40"/> <img src="https://devicons.github.io/devicon/devicon.git/icons/html5/html5-original-wordmark.svg" alt="html5" width="40" height="40"/> <img src="https://api.iconify.design/logos-hugo.svg" alt="hugo" width="40" height="40"/> <img src="https://devicons.github.io/devicon/devicon.git/icons/javascript/javascript-original.svg" alt="javascript" width="40" height="40"/> <img src="https://www.vectorlogo.zone/logos/kubernetes/kubernetes-icon.svg" alt="kubernetes" width="40" height="40"/> <img src="https://devicons.github.io/devicon/devicon.git/icons/laravel/laravel-plain-wordmark.svg" alt="laravel" width="40" height="40"/> <img src="https://devicons.github.io/devicon/devicon.git/icons/linux/linux-original.svg" alt="linux" width="40" height="40"/> <img src="https://www.vectorlogo.zone/logos/mariadb/mariadb-icon.svg" alt="mariadb" width="40" height="40"/> <img src="https://devicons.github.io/devicon/devicon.git/icons/mysql/mysql-original-wordmark.svg" alt="mysql" width="40" height="40"/> <img src="https://devicons.github.io/devicon/devicon.git/icons/nginx/nginx-original.svg" alt="nginx" width="40" height="40"/> <img src="https://devicons.github.io/devicon/devicon.git/icons/nodejs/nodejs-original-wordmark.svg" alt="nodejs" width="40" height="40"/> <img src="https://devicons.github.io/devicon/devicon.git/icons/photoshop/photoshop-plain.svg" alt="photoshop" width="40" height="40"/> <img src="https://devicons.github.io/devicon/devicon.git/icons/php/php-original.svg" alt="php" width="40" height="40"/> <img src="https://devicons.github.io/devicon/devicon.git/icons/react/react-original-wordmark.svg" alt="react" width="40" height="40"/> <img src="https://reactnative.dev/img/header_logo.svg" alt="reactnative" width="40" height="40"/> <img src="https://devicons.github.io/devicon/devicon.git/icons/redis/redis-original-wordmark.svg" alt="redis" width="40" height="40"/> <img src="https://devicons.github.io/devicon/devicon.git/icons/redux/redux-original.svg" alt="redux" width="40" height="40"/> <img src="https://devicons.github.io/devicon/devicon.git/icons/sass/sass-original.svg" alt="sass" width="40" height="40"/> <img src="https://devicons.github.io/devicon/devicon.git/icons/typescript/typescript-original.svg" alt="typescript" width="40" height="40"/> <img src="https://www.vectorlogo.zone/logos/vagrantup/vagrantup-icon.svg" alt="vagrant" width="40" height="40"/> <img src="https://devicons.github.io/devicon/devicon.git/icons/webpack/webpack-original.svg" alt="webpack" width="40" height="40"/></p><p><img align="left" src="https://github-readme-stats.vercel.app/api/top-langs/?username=mpc&layout=compact&hide=html" alt="mpc" /></p>
+### Running the API Server
 
-<p>&nbsp;<img align="center" src="https://github-readme-stats.vercel.app/api?username=mpc&show_icons=true" alt="mpc" /></p>
+Start the API server with:
 
-<p align="center">
-<a href="https://codepen.io/mpc-the-selector" target="blank"><img align="center" src="https://cdn.jsdelivr.net/npm/simple-icons@3.0.1/icons/codepen.svg" alt="mpc-the-selector" height="30" width="30" /></a>
-<a href="https://dev.to/mpc" target="blank"><img align="center" src="https://cdn.jsdelivr.net/npm/simple-icons@3.0.1/icons/dev-dot-to.svg" alt="mpc" height="30" width="30" /></a>
-<a href="https://twitter.com/mpc" target="blank"><img align="center" src="https://cdn.jsdelivr.net/npm/simple-icons@3.0.1/icons/twitter.svg" alt="mpc" height="30" width="30" /></a>
-<a href="https://linkedin.com/in/marianoperez" target="blank"><img align="center" src="https://cdn.jsdelivr.net/npm/simple-icons@3.0.1/icons/linkedin.svg" alt="marianoperez" height="30" width="30" /></a>
-<a href="https://stackoverflow.com/users/78304" target="blank"><img align="center" src="https://cdn.jsdelivr.net/npm/simple-icons@3.0.1/icons/stackoverflow.svg" alt="78304" height="30" width="30" /></a>
-<a href="https://codesandbox.com/mpc" target="blank"><img align="center" src="https://cdn.jsdelivr.net/npm/simple-icons@3.0.1/icons/codesandbox.svg" alt="mpc" height="30" width="30" /></a>
-<a href="https://fb.com/mpcdigital" target="blank"><img align="center" src="https://cdn.jsdelivr.net/npm/simple-icons@3.0.1/icons/facebook.svg" alt="mpcdigital" height="30" width="30" /></a>
-<a href="https://instagram.com/mpcdigital" target="blank"><img align="center" src="https://cdn.jsdelivr.net/npm/simple-icons@3.0.1/icons/instagram.svg" alt="mpcdigital" height="30" width="30" /></a>
-<a href="https://medium.com/@mpc" target="blank"><img align="center" src="https://cdn.jsdelivr.net/npm/simple-icons@3.0.1/icons/medium.svg" alt="@mpc" height="30" width="30" /></a>
-<a href="https://www.youtube.com/c/mariano pérez caro" target="blank"><img align="center" src="https://cdn.jsdelivr.net/npm/simple-icons@3.0.1/icons/youtube.svg" alt="mariano pérez caro" height="30" width="30" /></a>
-</p>
+```bash
+python scripts/run_api.py
+```
+
+The server will be available at http://localhost:8000 by default.
+
+## Architecture
+
+Chimera is built with a modular architecture:
+
+- **ContextCacheService**: Manages code context and provides relevant information to the AI.
+- **PromptService**: Creates intelligent, context-aware prompts for different AI tasks.
+- **AIClient**: Handles communication with LLM providers (OpenAI, Vertex AI, etc.).
+- **RuleEngineService**: Evaluates rules against code context and automates actions.
+- **DatabaseService**: Handles persistence for contexts, rules, and other data.
+
+## API Endpoints
+
+The API provides several endpoints for interacting with Chimera:
+
+- `/ai/generate`: Generate code based on a prompt and context
+- `/ai/explain`: Explain code with optional context
+- `/ai/analyze`: Analyze code for issues and improvements
+- `/ai/chat`: Chat with the AI about code
+- `/ai/test`: Generate tests for code
+- `/context/`: Manage context snapshots
+- `/rules/`: Manage and evaluate rules
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details. 

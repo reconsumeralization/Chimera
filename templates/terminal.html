@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal - Developer's Toolkit</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --card-bg: #ffffff;
+            --border-color: #dee2e6;
+            --terminal-bg: #1e1e1e;
+            --terminal-text: #ffffff;
+            --terminal-prompt: #00ff00;
+            --terminal-error: #ff0000;
+            --terminal-success: #00ff00;
+            --terminal-warning: #ffff00;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #212529;
+            --text-color: #f8f9fa;
+            --card-bg: #2c3034;
+            --border-color: #495057;
+            --terminal-bg: #000000;
+            --terminal-text: #ffffff;
+            --terminal-prompt: #00ff00;
+            --terminal-error: #ff0000;
+            --terminal-success: #00ff00;
+            --terminal-warning: #ffff00;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        .navbar {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .terminal {
+            background-color: var(--terminal-bg);
+            color: var(--terminal-text);
+            font-family: 'Consolas', 'Monaco', monospace;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            height: 500px;
+            overflow-y: auto;
+        }
+
+        .terminal-line {
+            margin-bottom: 0.5rem;
+            white-space: pre-wrap;
+        }
+
+        .terminal-prompt {
+            color: var(--terminal-prompt);
+        }
+
+        .terminal-error {
+            color: var(--terminal-error);
+        }
+
+        .terminal-success {
+            color: var(--terminal-success);
+        }
+
+        .terminal-warning {
+            color: var(--terminal-warning);
+        }
+
+        .terminal-input {
+            background-color: transparent;
+            border: none;
+            color: var(--terminal-text);
+            font-family: 'Consolas', 'Monaco', monospace;
+            width: 100%;
+            outline: none;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Developer's Toolkit</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/code-analysis">Code Analysis</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/terminal">Terminal</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/git">Git</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/settings">Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Terminal</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="terminal" id="terminal">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">$</span> python -m venv venv
+                            </div>
+                            <div class="terminal-line terminal-success">
+                                Virtual environment created successfully.
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">$</span> .\venv\Scripts\activate
+                            </div>
+                            <div class="terminal-line terminal-success">
+                                (venv) PS C:\Users\recon\New folder\mpc>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">$</span> pip install -r requirements.txt
+                            </div>
+                            <div class="terminal-line terminal-success">
+                                Successfully installed fastapi-0.104.1 uvicorn-0.24.0
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">$</span> python main.py
+                            </div>
+                            <div class="terminal-line terminal-success">
+                                INFO:     Started server process [1234]
+                                INFO:     Waiting for application startup.
+                                INFO:     Application startup complete.
+                                INFO:     Uvicorn running on http://127.0.0.1:8000
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">$</span> <input type="text" class="terminal-input" placeholder="Type a command...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">MCP Connection</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Connection URL:</strong> http://localhost:8000</p>
+                        <p><strong>CLI Command:</strong> mcp --url http://localhost:8000</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn btn-outline-secondary theme-toggle" onclick="toggleTheme()">
+        <i class="bi bi-moon-stars"></i>
+    </button>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+
+        // Handle terminal input
+        const terminalInput = document.querySelector('.terminal-input');
+        terminalInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const command = this.value;
+                if (command.trim()) {
+                    // Add command to terminal
+                    const terminal = document.getElementById('terminal');
+                    const commandLine = document.createElement('div');
+                    commandLine.className = 'terminal-line';
+                    commandLine.innerHTML = `<span class="terminal-prompt">$</span> ${command}`;
+                    terminal.insertBefore(commandLine, this.parentElement);
+
+                    // Clear input
+                    this.value = '';
+
+                    // TODO: Send command to backend and handle response
+                    // For now, just show a mock response
+                    const responseLine = document.createElement('div');
+                    responseLine.className = 'terminal-line terminal-success';
+                    responseLine.textContent = 'Command executed successfully.';
+                    terminal.insertBefore(responseLine, this.parentElement);
+
+                    // Scroll to bottom
+                    terminal.scrollTop = terminal.scrollHeight;
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

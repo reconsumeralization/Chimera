@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Chimera</title>
+    <meta name="description" content="Project Chimera - Context-aware AI for software development">
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+    <div class="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden">
+        <canvas id="chimera-canvas" class="absolute top-0 left-0 w-full h-full"></canvas>
+        
+        <div class="header-content">
+            <h1 class="text-xl md:text-2xl font-bold tracking-tight">
+                <span class="primary-text">PROJECT</span> 
+                <span class="secondary-text">CHIMERA</span>
+            </h1>
+            <div class="mt-2 text-sm text-gray-400">Contextual AI for Development</div>
+        </div>
+        
+        <div style="z-index: 10; text-align: center; padding: 0 1rem; margin-bottom: 2.5rem; width: 100%; max-width: 768px;">
+            <div style="margin-bottom: 1rem;">
+                <span style="display: block; font-size: 2.25rem; font-weight: bold; letter-spacing: 0.025em; margin-bottom: 1rem;">
+                    <span class="primary-text">Multi-headed</span> 
+                    <span class="secondary-text">Intelligence</span>
+                </span>
+                <p style="font-size: 1.125rem; color: #E0E0E0; margin-bottom: 1.5rem;">
+                    Chimera brings context-aware AI capabilities to your development workflow
+                </p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; text-align: left;">
+                <div class="chimera-card chimera-card-primary">
+                    <h3 class="primary-text" style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Context Cache</h3>
+                    <p style="color: #E0E0E0;">Intelligent storage of your IDE context for relevant AI assistance</p>
+                </div>
+                <div class="chimera-card chimera-card-secondary">
+                    <h3 class="secondary-text" style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Rule Engine</h3>
+                    <p style="color: #E0E0E0;">Automated code analysis and suggestions based on custom rules</p>
+                </div>
+                <div class="chimera-card chimera-card-secondary">
+                    <h3 class="secondary-text" style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">AI Integration</h3>
+                    <p style="color: #E0E0E0;">Seamless integration with advanced AI models for code generation and analysis</p>
+                </div>
+                <div class="chimera-card chimera-card-primary">
+                    <h3 class="primary-text" style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">API Framework</h3>
+                    <p style="color: #E0E0E0;">Robust REST API for easy integration with development tools</p>
+                </div>
+            </div>
+            
+            <div style="margin-top: 2rem; display: flex; justify-content: center; gap: 1rem;">
+                <a href="/docs" class="chimera-button chimera-button-primary">
+                    API Documentation
+                </a>
+                <a href="https://github.com/your-repo/project-chimera" class="chimera-button chimera-button-secondary">
+                    GitHub Repository
+                </a>
+            </div>
+        </div>
+        
+        <div class="footer-content">
+            <div style="color: #A0A0A0;">
+                <span class="api-status {{ 'online' if status else 'offline' }}"></span>
+                API Status: {{ 'Online' if status else 'Offline' }}
+            </div>
+            <div style="color: #A0A0A0;">{{ version }}</div>
+        </div>
+    </div>
+
+    <script src="/static/js/chimera-animation.js"></script>
+</body>
+</html> 

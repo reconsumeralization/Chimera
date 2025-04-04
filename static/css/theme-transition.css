@@ -1,0 +1,168 @@
+/* --- Theme Transition --- */
+.theme-transition,
+.theme-transition *,
+.theme-transition *:before,
+.theme-transition *:after {
+    transition: all 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) !important;
+    transition-delay: 0s !important;
+}
+
+/* --- Dark Mode Specific Styles --- */
+.dark-mode-active {
+    background-image: 
+        radial-gradient(circle at 50% 50%, rgba(57, 255, 20, 0.05), transparent 80%),
+        linear-gradient(to bottom, rgba(10, 14, 18, 0.95), rgba(10, 14, 18, 0.95));
+}
+
+.dark-mode-active .navbar {
+    box-shadow: 0 2px 15px rgba(57, 255, 20, 0.2);
+}
+
+.dark-mode-active .navbar-brand {
+    text-shadow: 
+        0 0 7px #39ff14,
+        0 0 10px #39ff14,
+        0 0 21px #39ff14;
+}
+
+.dark-mode-active .nav-link.active {
+    border-bottom: 2px solid #39ff14;
+    box-shadow: 0 4px 10px -4px rgba(57, 255, 20, 0.5);
+}
+
+.dark-mode-active button:not(.close-button, .command-palette-close) {
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.dark-mode-active button:not(.close-button, .command-palette-close)::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(57, 255, 20, 0.1) 50%, 
+        transparent 100%);
+    transition: left 0.5s ease;
+    z-index: -1;
+}
+
+.dark-mode-active button:not(.close-button, .command-palette-close):hover::before {
+    left: 100%;
+}
+
+.dark-mode-active pre code {
+    background-color: rgba(0, 0, 0, 0.7);
+    border-left: 3px solid #39ff14;
+    box-shadow: 0 0 10px rgba(57, 255, 20, 0.2);
+}
+
+.dark-mode-active .card {
+    position: relative;
+    overflow: hidden;
+}
+
+.dark-mode-active .card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+        0deg,
+        rgba(57, 255, 20, 0.03) 0px,
+        rgba(57, 255, 20, 0.03) 1px,
+        transparent 1px,
+        transparent 4px
+    );
+    mix-blend-mode: overlay;
+    opacity: 0.3;
+}
+
+.dark-mode-active .footer {
+    border-top: 1px solid rgba(57, 255, 20, 0.2);
+    box-shadow: 0 -2px 10px rgba(57, 255, 20, 0.1);
+}
+
+/* --- Neon Elements --- */
+.dark-mode-active .btn-primary {
+    background-color: rgba(57, 255, 20, 0.2);
+    border-color: #39ff14;
+    color: #39ff14;
+    box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+    text-shadow: 0 0 5px rgba(57, 255, 20, 0.5);
+}
+
+.dark-mode-active .btn-primary:hover {
+    background-color: rgba(57, 255, 20, 0.3);
+    box-shadow: 0 0 15px rgba(57, 255, 20, 0.5);
+}
+
+.dark-mode-active .progress-bar {
+    background-color: #39ff14;
+    box-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+}
+
+.dark-mode-active input:focus,
+.dark-mode-active textarea:focus,
+.dark-mode-active select:focus {
+    border-color: #39ff14 !important;
+    box-shadow: 0 0 10px rgba(57, 255, 20, 0.3) !important;
+}
+
+/* --- Matrix Code Rain --- */
+.matrix-code-rain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.3;
+}
+
+/* --- Cyber Grid Background --- */
+.dark-mode-active::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        linear-gradient(rgba(57, 255, 20, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(57, 255, 20, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: -2;
+    opacity: 0.2;
+    pointer-events: none;
+}
+
+/* --- Glow Effect for Elements --- */
+.dark-mode-active .card h3,
+.dark-mode-active .card h4,
+.dark-mode-active .metric-group h3,
+.dark-mode-active .info-group h3 {
+    color: #fff;
+    text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+    transition: text-shadow 0.3s ease;
+}
+
+.dark-mode-active .card:hover h3,
+.dark-mode-active .card:hover h4,
+.dark-mode-active .metric-group:hover h3,
+.dark-mode-active .info-group:hover h3 {
+    text-shadow: 0 0 15px rgba(57, 255, 20, 0.8);
+}
+
+/* --- Badge Styling --- */
+.dark-mode-active .badge {
+    background-color: rgba(57, 255, 20, 0.2);
+    color: #39ff14;
+    border: 1px solid rgba(57, 255, 20, 0.3);
+    text-shadow: 0 0 5px rgba(57, 255, 20, 0.5);
+} 

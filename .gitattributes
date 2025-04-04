@@ -1,0 +1,27 @@
+# Set default behavior to automatically normalize line endings
+* text=auto
+
+# Explicitly declare text files
+*.txt text
+*.py text
+*.md text
+*.html text
+*.css text
+*.js text
+*.json text
+
+# Declare shell scripts to use LF
+*.sh text eol=lf
+make_executable.py text eol=lf
+
+# Declare batch files to use CRLF
+*.bat text eol=crlf
+
+# Denote binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary 
