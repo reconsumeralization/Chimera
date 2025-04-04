@@ -1,14 +1,19 @@
-"""MCP tool implementations for Project Chimera."""
+"""MCP tools for Project Chimera."""
+from typing import List, Type
 
+from .base import BaseTool
 from .analyze import AnalyzeTool
-from .filesystem import FileSystemTool
-from .git import GitTool
-from .system import SystemInfoTool
+from .context_cache import ContextCacheTool
 
-# Export tools for easier imports
+# List of all tool classes
+ALL_TOOLS: List[Type[BaseTool]] = [
+    AnalyzeTool,
+    ContextCacheTool,
+]
+
 __all__ = [
+    "BaseTool",
     "AnalyzeTool",
-    "FileSystemTool",
-    "GitTool",
-    "SystemInfoTool",
+    "ContextCacheTool",
+    "ALL_TOOLS",
 ] 

@@ -43,9 +43,11 @@ class ChimeraMCP:
     def _register_tools(self) -> None:
         """Register built-in tools with the registry."""
         from .tools.analyze import AnalyzeTool
+        from .tools.context_cache import ContextCacheTool
         
         # Register tools
         registry.register(AnalyzeTool)
+        registry.register(ContextCacheTool)
         
         # More tools will be registered here
         
