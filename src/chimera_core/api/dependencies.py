@@ -164,9 +164,9 @@ async def get_rule_engine_service() -> RuleEngineService:
 
 
 # Create annotated dependencies for use in route functions
-DBService = Annotated[DatabaseService, Depends(get_db_service)]
-ContextService = Annotated[ContextCacheService, Depends(get_context_cache_service)]
-PromptService = Annotated[PromptService, Depends(get_prompt_service)]
-AIService = Annotated[AIClient, Depends(get_ai_client)]
-RuleService = Annotated[RuleEngineService, Depends(get_rule_engine_service)]
+DBService = DatabaseService
+ContextService = ContextCacheService
+PromptService = PromptService
+AIService = AIClient
+RuleService = RuleEngineService
 APIKey = Annotated[bool, Depends(verify_api_key)] 

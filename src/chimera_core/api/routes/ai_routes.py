@@ -6,13 +6,13 @@ explanation, review, and chat functionality.
 
 import asyncio
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import StreamingResponse
 from pydantic import ValidationError
 
-from src.chimera_core.api.dependencies import AIService, ContextService, PromptService, APIKey
+from src.chimera_core.api.dependencies import AIService, ContextService, PromptService, APIKey, get_ai_client, get_context_cache_service, get_prompt_service
 from src.chimera_core.api.models import (
     CodeAnalysisRequest, CodeAnalysisResponse,
     CodeExplanationRequest, CodeExplanationResponse,
@@ -33,9 +33,9 @@ logger = logging.getLogger(__name__)
 @router.post("/generate", response_model=CodeGenerationResponse, dependencies=[Depends(APIKey)])
 async def generate_code(
     request: CodeGenerationRequest,
-    ai_client: AIService,
-    context_cache: ContextService,
-    prompt_service: PromptService
+    ai_client: Annotated[AIService, Depends(get_ai_client)],
+    context_cache: Annotated[ContextService, Depends(get_context_cache_service)],
+    prompt_service: Annotated[PromptService, Depends(get_prompt_service)]
 ) -> CodeGenerationResponse:
     """Generate code based on the prompt and context."""
     try:
@@ -122,9 +122,9 @@ async def generate_code(
 @router.post("/generate/stream", dependencies=[Depends(APIKey)])
 async def generate_code_stream(
     request: CodeGenerationRequest,
-    ai_client: AIService,
-    context_cache: ContextService,
-    prompt_service: PromptService
+    ai_client: Annotated[AIService, Depends(get_ai_client)],
+    context_cache: Annotated[ContextService, Depends(get_context_cache_service)],
+    prompt_service: Annotated[PromptService, Depends(get_prompt_service)]
 ) -> StreamingResponse:
     """Generate code with streaming response based on the prompt and context."""
     try:
@@ -193,9 +193,9 @@ async def generate_code_stream(
 @router.post("/explain", response_model=CodeExplanationResponse)
 async def explain_code(
     request: CodeExplanationRequest,
-    ai_client: AIService,
-    context_cache: ContextService,
-    prompt_service: PromptService
+    ai_client: Annotated[AIService, Depends(get_ai_client)],
+    context_cache: Annotated[ContextService, Depends(get_context_cache_service)],
+    prompt_service: Annotated[PromptService, Depends(get_prompt_service)]
 ) -> CodeExplanationResponse:
     """Explain the provided code with optional context."""
     try:
@@ -271,9 +271,9 @@ async def explain_code(
 @router.post("/analyze", response_model=CodeAnalysisResponse)
 async def analyze_code(
     request: CodeAnalysisRequest,
-    ai_client: AIService,
-    context_cache: ContextService,
-    prompt_service: PromptService
+    ai_client: Annotated[AIService, Depends(get_ai_client)],
+    context_cache: Annotated[ContextService, Depends(get_context_cache_service)],
+    prompt_service: Annotated[PromptService, Depends(get_prompt_service)]
 ) -> CodeAnalysisResponse:
     """Analyze the provided code for issues and improvement opportunities."""
     try:
@@ -309,9 +309,9 @@ async def analyze_code(
 @router.post("/chat", response_model=CodeChatResponse)
 async def chat_with_code(
     request: CodeChatRequest,
-    ai_client: AIService,
-    context_cache: ContextService,
-    prompt_service: PromptService
+    ai_client: Annotated[AIService, Depends(get_ai_client)],
+    context_cache: Annotated[ContextService, Depends(get_context_cache_service)],
+    prompt_service: Annotated[PromptService, Depends(get_prompt_service)]
 ) -> CodeChatResponse:
     """Chat with AI about code, providing context from the IDE."""
     try:
@@ -374,9 +374,9 @@ async def chat_with_code(
 @router.post("/chat/stream")
 async def chat_with_code_stream(
     request: CodeChatRequest,
-    ai_client: AIService,
-    context_cache: ContextService,
-    prompt_service: PromptService
+    ai_client: Annotated[AIService, Depends(get_ai_client)],
+    context_cache: Annotated[ContextService, Depends(get_context_cache_service)],
+    prompt_service: Annotated[PromptService, Depends(get_prompt_service)]
 ) -> StreamingResponse:
     """Chat with AI about code with streaming response, providing context from the IDE."""
     try:
@@ -450,9 +450,9 @@ async def chat_with_code_stream(
 @router.post("/test", response_model=CodeTestResponse)
 async def generate_tests(
     request: CodeTestRequest,
-    ai_client: AIService,
-    context_cache: ContextService,
-    prompt_service: PromptService
+    ai_client: Annotated[AIService, Depends(get_ai_client)],
+    context_cache: Annotated[ContextService, Depends(get_context_cache_service)],
+    prompt_service: Annotated[PromptService, Depends(get_prompt_service)]
 ) -> CodeTestResponse:
     """Generate tests for the provided code."""
     try:
