@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Tokenizer Dashboard</title>
+    <link rel="stylesheet" href="{{{styleUri}}}">
+</head>
+<body>
+    <div class="dashboard-header">
+        <h1>Gemini Tokenizer Dashboard</h1>
+        <div class="status-badge" id="status-badge">
+            <span id="status-text">Initializing...</span>
+        </div>
+    </div>
+    
+    <div id="message-container"></div>
+    
+    <div class="tab-container">
+        <div class="tab-buttons">
+            <button class="tab-button active" data-tab="tokenize-tab">Tokenize</button>
+            <button class="tab-button" data-tab="generate-tab">Generate Text</button>
+            <button class="tab-button" data-tab="analyze-tab">Analyze Samples</button>
+            <button class="tab-button" data-tab="settings-tab">Settings</button>
+        </div>
+        
+        <!-- Tokenize Tab -->
+        <div id="tokenize-tab" class="tab-content active">
+            <div class="panel">
+                <h2>Tokenize Text</h2>
+                <p>Enter text to see how it's tokenized by the Gemini model.</p>
+                
+                <textarea id="tokenize-input" rows="5" placeholder="Enter text to tokenize..."></textarea>
+                
+                <div class="controls-container">
+                    <button id="tokenize-button">Tokenize</button>
+                </div>
+                
+                <div class="results-container">
+                    <h3>Tokens</h3>
+                    <div id="tokenize-results" class="token-results">
+                        <div class="placeholder">Results will appear here after tokenization</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Generate Text Tab -->
+        <div id="generate-tab" class="tab-content">
+            <div class="panel">
+                <h2>Generate Text</h2>
+                <p>Enter a prompt to generate text using the Gemini model.</p>
+                
+                <textarea id="generation-prompt" rows="5" placeholder="Enter your prompt..."></textarea>
+                
+                <div class="controls-container">
+                    <button id="generate-button">Generate</button>
+                </div>
+                
+                <div class="results-container">
+                    <h3>Generated Text</h3>
+                    <div id="generation-results" class="generation-results">
+                        <div class="placeholder">Generated text will appear here</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Analyze Samples Tab -->
+        <div id="analyze-tab" class="tab-content">
+            <div class="panel">
+                <h2>Analyze Token Distribution</h2>
+                <p>Enter multiple samples (one per line) to analyze token distribution patterns.</p>
+                
+                <textarea id="analysis-input" rows="5" placeholder="Enter samples, one per line..."></textarea>
+                
+                <div class="controls-container">
+                    <button id="analyze-button">Analyze</button>
+                </div>
+                
+                <div class="results-container">
+                    <h3>Analysis Results</h3>
+                    <div id="analysis-results" class="analysis-results">
+                        <div class="placeholder">Analysis results will appear here</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Settings Tab -->
+        <div id="settings-tab" class="tab-content">
+            <div class="panel">
+                <h2>Settings</h2>
+                
+                <div class="settings-group">
+                    <h3>Generation Parameters</h3>
+                    
+                    <div class="control-group">
+                        <label for="temperature-slider">Temperature: <span id="temperature-value">0.7</span></label>
+                        <input type="range" id="temperature-slider" min="0" max="1" step="0.05" value="0.7">
+                        <p>Controls randomness (0 = deterministic, 1 = random)</p>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="top-k-slider">Top-K: <span id="top-k-value">40</span></label>
+                        <input type="range" id="top-k-slider" min="1" max="100" step="1" value="40">
+                        <p>Limits token selection to top K tokens</p>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="top-p-slider">Top-P: <span id="top-p-value">0.95</span></label>
+                        <input type="range" id="top-p-slider" min="0" max="1" step="0.01" value="0.95">
+                        <p>Nucleus sampling probability threshold</p>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="sample-length">Sample Length:</label>
+                        <input type="number" id="sample-length" min="1" max="1000" value="100">
+                        <p>Maximum length of generated samples</p>
+                    </div>
+                </div>
+                
+                <div class="settings-group">
+                    <h3>Cache Settings</h3>
+                    
+                    <div class="control-group">
+                        <label>
+                            <input type="checkbox" id="cache-toggle" checked>
+                            Enable Tokenization Cache
+                        </label>
+                        <p>Store token results to improve performance</p>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="max-cache-items">Maximum Cache Items:</label>
+                        <input type="number" id="max-cache-items" min="100" max="10000" value="1000">
+                        <p>Maximum number of items to store in cache</p>
+                    </div>
+                    
+                    <button id="clear-cache-button">Clear Cache</button>
+                </div>
+                
+                <div class="controls-container">
+                    <button id="save-settings-button">Save Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{{scriptUri}}}"></script>
+</body>
+</html> 

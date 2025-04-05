@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Chimera Dashboard</title>
+    <link rel="stylesheet" href="{{{styleUri}}}" />
+    <!-- The following styles are for development preview only.
+         In production, styles will be dynamically injected by the extension -->
+    <style>
+        /* Local development preview styles - these will be replaced in the extension */
+    </style>
+</head>
+<body>
+    <!-- Header section -->
+    <h1>== PROJECT CHIMERA CONTROL PANEL ==</h1>
+    <div class="panel">
+        <h2>> EXPERIMENTAL SYSTEMS MANAGEMENT</h2>
+        <p>Mad Scientist dashboard for managing all Chimera services and connections.</p>
+    </div>
+    
+    <!-- Main tabs container -->
+    <div class="tab-container">
+        <div class="tab-buttons">
+            <button class="tab-button active" data-tab="services">SERVICES</button>
+            <button class="tab-button" data-tab="mcp">MCP CONNECTION</button>
+            <button class="tab-button" data-tab="terminal">TERMINAL</button>
+            <button class="tab-button" data-tab="config">CONFIGURATION</button>
+        </div>
+        
+        <!-- Services Tab -->
+        <div class="tab-content active" id="services-tab">
+            <h3>> SYSTEM SERVICES</h3>
+            
+            <div id="services-list">
+                <!-- Service items will be dynamically inserted here -->
+                <div class="service-status running">
+                    <span>Web Server</span>
+                    <span class="success">RUNNING</span>
+                </div>
+                <div class="service-status stopped">
+                    <span>MCP Server</span>
+                    <span class="error">STOPPED</span>
+                </div>
+                <div class="service-status stopped">
+                    <span>Rule Engine</span>
+                    <span class="error">STOPPED</span>
+                </div>
+            </div>
+            
+            <div class="button-grid">
+                <button id="refresh-services">REFRESH STATUS</button>
+                <button id="start-all-services">ACTIVATE ALL [A]</button>
+                <button id="stop-all-services">TERMINATE ALL [T]</button>
+            </div>
+        </div>
+        
+        <!-- MCP Connection Tab -->
+        <div class="tab-content" id="mcp-tab">
+            <h3>> MCP CONNECTION SETTINGS</h3>
+            
+            <div class="panel">
+                <div>
+                    <label for="mcp-url">MCP URL:</label>
+                    <input type="text" id="mcp-url" value="http://localhost:8000/mcp">
+                </div>
+                
+                <div style="margin-top: 10px;">
+                    <input type="checkbox" id="auth-required">
+                    <label for="auth-required">Authentication Required</label>
+                </div>
+                
+                <div id="auth-settings" style="display: none; margin-top: 10px;">
+                    <div>
+                        <label for="username">Username:</label>
+                        <input type="text" id="username">
+                    </div>
+                    <div style="margin-top: 5px;">
+                        <label for="api-key">API Key:</label>
+                        <input type="password" id="api-key">
+                    </div>
+                </div>
+                
+                <div class="button-grid" style="margin-top: 15px;">
+                    <button id="test-connection">TEST CONNECTION</button>
+                    <button id="save-mcp-settings">SAVE SETTINGS</button>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h3>> CONNECTION STATUS</h3>
+                <div id="connection-status">
+                    <p>Not connected to MCP.</p>
+                </div>
+                <div class="terminal-output" id="mcp-output"></div>
+            </div>
+        </div>
+        
+        <!-- Terminal Tab -->
+        <div class="tab-content" id="terminal-tab">
+            <h3>> SYSTEM CONSOLE</h3>
+            
+            <div class="button-grid">
+                <button id="clear-terminal">CLEAR CONSOLE</button>
+                <button id="web-server-cmd">WEB SERVER</button>
+                <button id="mcp-server-cmd">MCP SERVER</button>
+            </div>
+            
+            <div class="terminal-output" id="terminal-output">
+                [INFO] Project Chimera Dashboard Initialized
+                [INFO] Ready to execute commands
+            </div>
+        </div>
+        
+        <!-- Configuration Tab -->
+        <div class="tab-content" id="config-tab">
+            <h3>> SYSTEM CONFIGURATION</h3>
+            
+            <div class="panel">
+                <h3>> APPEARANCE</h3>
+                <div>
+                    <label for="theme-select">Theme:</label>
+                    <select id="theme-select">
+                        <option value="madScientist">Mad Scientist</option>
+                        <option value="darkLab">Dark Lab</option>
+                        <option value="toxicGreen">Toxic Green</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h3>> SYSTEM SETTINGS</h3>
+                <div>
+                    <label for="metrics-interval">Metrics Update Interval (ms):</label>
+                    <input type="number" id="metrics-interval" value="2000" min="500" max="10000">
+                </div>
+                
+                <div style="margin-top: 10px;">
+                    <label for="max-memory">Maximum Memory Usage (MB):</label>
+                    <input type="number" id="max-memory" value="1024" min="256" max="8192">
+                </div>
+                
+                <div style="margin-top: 10px;">
+                    <label for="max-cpu">Maximum CPU Usage (%):</label>
+                    <input type="number" id="max-cpu" value="90" min="10" max="100">
+                </div>
+            </div>
+            
+            <div class="button-grid">
+                <button id="save-settings">SAVE ALL SETTINGS</button>
+                <button id="reset-settings">RESET TO DEFAULTS</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Tab switching
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.getAttribute('data-tab');
+                
+                // Update active button
+                document.querySelectorAll('.tab-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                button.classList.add('active');
+                
+                // Update active tab
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
+        
+        // Auth checkbox toggle
+        document.getElementById('auth-required').addEventListener('change', (e) => {
+            const authSettings = document.getElementById('auth-settings');
+            authSettings.style.display = e.target.checked ? 'block' : 'none';
+        });
+        
+        // Create bubbles for the mad scientist effect
+        function createBubbles() {
+            for (let i = 0; i < 15; i++) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                
+                // Random size between 10 and 40px
+                const size = Math.random() * 30 + 10;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                
+                // Random position
+                bubble.style.left = `${Math.random() * 100}%`;
+                bubble.style.bottom = `-${size}px`;
+                
+                // Random animation duration between 5 and 15 seconds
+                const duration = Math.random() * 10 + 5;
+                bubble.style.animationDuration = `${duration}s`;
+                
+                document.body.appendChild(bubble);
+                
+                // Remove bubble after animation completes
+                setTimeout(() => {
+                    bubble.remove();
+                }, duration * 1000);
+            }
+        }
+        
+        // Create initial bubbles and continue periodically
+        createBubbles();
+        setInterval(createBubbles, 5000);
+        
+        // Handle messages from the extension
+        window.addEventListener('message', event => {
+            const message = event.data;
+            
+            // Handle different message types
+            switch (message.command) {
+                case 'updateServices':
+                    // Update service list
+                    break;
+                case 'updateConnectionStatus':
+                    // Update MCP connection status
+                    break;
+                case 'appendToTerminal':
+                    // Append to terminal output
+                    break;
+            }
+        });
+        
+        // Function to send message to the extension
+        function sendMessage(message) {
+            vscode.postMessage(message);
+        }
+        
+        // Button event listeners will be added here
+        document.getElementById('refresh-services').addEventListener('click', () => {
+            sendMessage({ command: 'refreshServices' });
+        });
+        
+        document.getElementById('start-all-services').addEventListener('click', () => {
+            sendMessage({ command: 'startAllServices' });
+        });
+        
+        document.getElementById('stop-all-services').addEventListener('click', () => {
+            sendMessage({ command: 'stopAllServices' });
+        });
+        
+        document.getElementById('test-connection').addEventListener('click', () => {
+            const url = document.getElementById('mcp-url').value;
+            const authRequired = document.getElementById('auth-required').checked;
+            const username = authRequired ? document.getElementById('username').value : '';
+            const apiKey = authRequired ? document.getElementById('api-key').value : '';
+            
+            sendMessage({ 
+                command: 'testConnection',
+                url,
+                authRequired,
+                username,
+                apiKey
+            });
+        });
+        
+        document.getElementById('save-mcp-settings').addEventListener('click', () => {
+            const url = document.getElementById('mcp-url').value;
+            const authRequired = document.getElementById('auth-required').checked;
+            const username = authRequired ? document.getElementById('username').value : '';
+            const apiKey = authRequired ? document.getElementById('api-key').value : '';
+            
+            sendMessage({ 
+                command: 'saveMcpSettings',
+                url,
+                authRequired,
+                username,
+                apiKey
+            });
+        });
+        
+        document.getElementById('theme-select').addEventListener('change', (e) => {
+            sendMessage({ 
+                command: 'changeTheme',
+                theme: e.target.value
+            });
+        });
+        
+        document.getElementById('save-settings').addEventListener('click', () => {
+            const metrics = document.getElementById('metrics-interval').value;
+            const memory = document.getElementById('max-memory').value;
+            const cpu = document.getElementById('max-cpu').value;
+            
+            sendMessage({ 
+                command: 'saveSettings',
+                metrics,
+                memory,
+                cpu
+            });
+        });
+        
+        document.getElementById('reset-settings').addEventListener('click', () => {
+            sendMessage({ command: 'resetSettings' });
+        });
+        
+        // Initialize with random startup message
+        const startupMessages = [
+            "All systems online. Ready for mad science.",
+            "Laboratory systems initialized. Awaiting your command.",
+            "Chimera project loaded. What shall we experiment with today?",
+            "Initializing experimental protocols... Done!",
+            "Welcome back, doctor. Your laboratory awaits."
+        ];
+        
+        const terminalOutput = document.getElementById('terminal-output');
+        const randomMessage = startupMessages[Math.floor(Math.random() * startupMessages.length)];
+        terminalOutput.textContent += `\n[SYSTEM] ${randomMessage}`;
+        
+        // Acquire the VS Code API
+        const vscode = acquireVsCodeApi();
+    </script>
+</body>
+</html> 

@@ -1,0 +1,14 @@
+out/
+node_modules/
+dist/
+*.vsix
+.vscode-test/
+.DS_Store
+coverage/
+.nyc_output/
+npm-debug.log
+yarn-error.log
+.idea/
+.vs/
+*~
+*.swp 

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chimera MCP Configuration</title>
+    <link rel="stylesheet" href="{{{styleUri}}}">
+    <!-- CSS styles will be injected by the extension -->
+</head>
+<body>
+    <div class="header">
+        <h1>MCP Configuration</h1>
+        <div class="logo">🧬</div>
+    </div>
+    
+    <div id="connection-status" class="connection-status disconnected">
+        <div class="status-icon disconnected">⚠️</div>
+        <div class="status-icon connected">✅</div>
+        <span id="status-text">Disconnected</span>
+    </div>
+    
+    <div class="config-panel">
+        <h2>Connection Settings</h2>
+        
+        <div class="form-group">
+            <label for="mcp-url">MCP URL:</label>
+            <input type="text" id="mcp-url" placeholder="http://localhost:8000/mcp">
+        </div>
+        
+        <div class="form-group">
+            <label>
+                <input type="checkbox" id="auth-required"> Authentication Required
+            </label>
+        </div>
+        
+        <div id="auth-settings" style="display: none;">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username">
+            </div>
+            
+            <div class="form-group">
+                <label for="api-key">API Key:</label>
+                <input type="password" id="api-key">
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button id="test-connection" class="primary-button">Test Connection</button>
+            <button id="save-config">Save Configuration</button>
+        </div>
+    </div>
+    
+    <div class="config-panel">
+        <h2>MCP Control</h2>
+        
+        <div class="button-group">
+            <button id="connect-button" class="success-button">Connect</button>
+            <button id="disconnect-button" class="danger-button" disabled>Disconnect</button>
+        </div>
+    </div>
+    
+    <div class="config-panel">
+        <h2>MCP Information</h2>
+        <div id="mcp-info">
+            <p>Connect to MCP to view information</p>
+        </div>
+    </div>
+    
+    <footer class="footer">
+        <p>Project Chimera - MCP Management Interface</p>
+    </footer>
+    
+    <script src="{{{scriptUri}}}"></script>
+</body>
+</html> 
