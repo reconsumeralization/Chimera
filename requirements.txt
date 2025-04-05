@@ -17,6 +17,7 @@ pydantic-settings>=2.0.3
 # AI and ML
 openai>=1.2.0
 tiktoken>=0.5.1
+google-generativeai>=0.3.0  # Google Generative AI SDK for Gemini models
 
 # Utilities
 structlog>=23.2.0

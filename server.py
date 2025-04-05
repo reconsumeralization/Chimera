@@ -17,8 +17,8 @@ from pydantic import BaseModel
 from mcp_data_collector import get_collector
 
 app = FastAPI(title="Enhanced Developer's Toolkit")
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="src/chimera_core/api/static"), name="static")
+templates = Jinja2Templates(directory="src/chimera_core/api/templates")
 
 # Enable CORS
 app.add_middleware(
@@ -42,7 +42,7 @@ class DataCollectionSettings(BaseModel):
 
 # Routes for the web interface
 @app.get("/", response_class=HTMLResponse)
-async def read_root(request: Request):
+async def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/tools", response_class=HTMLResponse)
@@ -193,6 +193,15 @@ async def proxy_mcp_request(path: str, request: Request):
             status_code=500,
             content={"error": str(e)}
         )
+
+# Add a status endpoint
+@app.get("/api/status")
+async def status():
+    return {
+        "ai_client": True,  # Replace with actual status check
+        "database": True,   # Replace with actual status check
+        "mcp_servers": True  # Replace with actual status check
+    }
 
 # Main entry point
 if __name__ == "__main__":

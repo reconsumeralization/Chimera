@@ -45,7 +45,7 @@ class ServiceFactory:
             
             # Create directories
             settings = get_settings()
-            cls._ensure_directories_exist(settings.data_directory)
+            cls._ensure_directories_exist(settings.DATA_DIRECTORY)
             cls._ensure_directories_exist(settings.rules_directory)
             
             # Initialize database connection pool FIRST
@@ -69,15 +69,40 @@ class ServiceFactory:
                 context_cache_service=cls._services["context_cache"]
             )
             
-            # Initialize AI client
+            # Initialize AI client with settings from ChimeraSettings
             ai_settings = get_ai_settings()
+            settings = get_settings()
+            
+            # Determine the AI provider and model
+            provider = settings.AI_PROVIDER.lower()
+            model = None
+            api_key = None
+            api_base = None
+            
+            if provider == "openai":
+                model = settings.OPENAI_MODEL
+                api_key = settings.OPENAI_API_KEY
+                api_base = settings.OPENAI_API_BASE
+            elif provider == "gemini":
+                # If Gemini is specified as provider, use appropriate settings
+                model = ai_settings.get("model_name", "gemini-1.5-pro")
+                api_key = settings.get("GEMINI_API_KEY", None)
+                # Gemini doesn't typically use an API base URL
+            else:
+                # Default to OpenAI as fallback
+                logger.warning(f"Unknown AI provider '{provider}', defaulting to OpenAI")
+                model = settings.OPENAI_MODEL
+                api_key = settings.OPENAI_API_KEY
+                api_base = settings.OPENAI_API_BASE
+            
+            # Create the AI client with provider-specific configuration
             cls._services["ai_client"] = AIClient(
-                api_key=ai_settings["api_key"],
-                model=ai_settings["model_name"],
-                api_base=ai_settings["api_base"],
-                api_version=ai_settings["api_version"],
-                max_tokens=ai_settings["max_tokens"],
-                temperature=ai_settings["temperature"],
+                api_key=api_key,
+                model=model,
+                api_base=api_base,
+                api_version=ai_settings.get("api_version", None),
+                max_tokens=ai_settings.get("max_tokens", 2048),
+                temperature=ai_settings.get("temperature", 0.7),
                 prompt_service=cls._services["prompt_service"],
             )
             

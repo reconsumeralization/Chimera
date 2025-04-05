@@ -1,4 +1,55 @@
+#!/usr/bin/env python
 """
+MCP Fixer for Project Chimera
+
+This script helps fix common MCP-related issues by creating a simple wrapper
+that doesn't require the missing FastMCP import.
+"""
+
+import os
+import sys
+import shutil
+from pathlib import Path
+
+def print_colored(message, color="white"):
+    """Print colored text if supported by the terminal."""
+    colors = {
+        "red": "\033[91m",
+        "green": "\033[92m",
+        "yellow": "\033[93m",
+        "blue": "\033[94m",
+        "magenta": "\033[95m",
+        "cyan": "\033[96m",
+        "white": "\033[97m",
+        "reset": "\033[0m"
+    }
+    
+    if os.name != "nt":  # Use colors on non-Windows systems
+        print(f"{colors.get(color, colors['white'])}{message}{colors['reset']}")
+    else:
+        print(message)
+
+def create_simplified_mcp_server():
+    """Create a simplified MCP server that doesn't use FastMCP."""
+    project_root = Path(__file__).resolve().parent
+    mcp_dir = project_root / "src" / "chimera_stdio_mcp"
+    
+    # Ensure the directory exists
+    if not mcp_dir.exists():
+        mcp_dir.mkdir(parents=True, exist_ok=True)
+        print_colored(f"Created directory: {mcp_dir}", "green")
+    
+    # Create __init__.py if it doesn't exist
+    init_file = mcp_dir / "__init__.py"
+    if not init_file.exists():
+        with open(init_file, "w") as f:
+            f.write('"""Chimera stdio MCP package."""\n')
+        print_colored(f"Created: {init_file}", "green")
+    
+    # Create a simplified server.py
+    server_file = mcp_dir / "server.py"
+    with open(server_file, "w") as f:
+        f.write('''"""
 Simplified MCP Server for Project Chimera.
 
 This is a basic implementation that doesn't require the full MCP functionality.
@@ -96,7 +147,7 @@ class SimpleMCP:
             "id": request_id,
             "result": result
         }
-        sys.stdout.write(json.dumps(response) + "\n")
+        sys.stdout.write(json.dumps(response) + "\\n")
         sys.stdout.flush()
     
     def send_error(self, request_id, error):
@@ -106,7 +157,7 @@ class SimpleMCP:
             "id": request_id,
             "error": error
         }
-        sys.stdout.write(json.dumps(response) + "\n")
+        sys.stdout.write(json.dumps(response) + "\\n")
         sys.stdout.flush()
     
     # Handler implementations
@@ -182,3 +233,50 @@ def main():
 
 if __name__ == "__main__":
     main()
+''')
+    print_colored(f"Created simplified MCP server: {server_file}", "green")
+
+    # Create tools directory if it doesn't exist
+    tools_dir = mcp_dir / "tools"
+    if not tools_dir.exists():
+        tools_dir.mkdir(parents=True, exist_ok=True)
+        print_colored(f"Created directory: {tools_dir}", "green")
+    
+    # Create __init__.py in tools directory
+    tools_init = tools_dir / "__init__.py"
+    if not tools_init.exists():
+        with open(tools_init, "w") as f:
+            f.write('"""Chimera MCP tools."""\n')
+        print_colored(f"Created: {tools_init}", "green")
+
+def main():
+    """Main entry point."""
+    print_colored("Project Chimera MCP Fixer", "cyan")
+    print_colored("==========================", "cyan")
+    print()
+    print_colored("This tool will create a simplified MCP implementation that doesn't require FastMCP.", "white")
+    print()
+    
+    try:
+        create_simplified_mcp_server()
+        print()
+        print_colored("✓ MCP fix applied successfully!", "green")
+        print()
+        print_colored("You can now use the simplified startup scripts:", "white")
+        print_colored("  - Windows: easy_start.bat", "yellow")
+        print_colored("  - Linux/Mac/WSL/Git Bash: ./easy_start.sh", "yellow")
+        print()
+        print_colored("These simplified scripts only start the core web server", "white")
+        print_colored("without requiring the full MCP functionality.", "white")
+        print()
+    except Exception as e:
+        print()
+        print_colored(f"✗ Error: {str(e)}", "red")
+        print()
+        return 1
+    
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main()) 
