@@ -1,0 +1,186 @@
+{
+  "name": "chimera-dashboard",
+  "displayName": "Project Chimera Dashboard",
+  "description": "Mad Scientist Control Panel for Project Chimera",
+  "version": "0.1.0",
+  "publisher": "project-chimera",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:chimera-dashboard.showDashboard",
+    "onCommand:chimera-dashboard.startServices",
+    "onCommand:chimera-dashboard.stopServices",
+    "onCommand:chimera-dashboard.configureMCP",
+    "onCommand:chimera-dashboard.showGeminiPanel",
+    "onCommand:chimera-dashboard.geminiGenerateCompletion",
+    "onCommand:chimera-dashboard.geminiRefactorCode",
+    "onCommand:chimera-dashboard.geminiGenerateTests"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "chimera-dashboard.showDashboard",
+        "title": "Chimera: Open Mad Scientist Dashboard"
+      },
+      {
+        "command": "chimera-dashboard.startServices",
+        "title": "Chimera: Activate All Services"
+      },
+      {
+        "command": "chimera-dashboard.stopServices",
+        "title": "Chimera: Terminate All Services"
+      },
+      {
+        "command": "chimera-dashboard.configureMCP",
+        "title": "Chimera: Configure MCP Connection"
+      },
+      {
+        "command": "chimera-dashboard.showGeminiPanel",
+        "title": "Chimera: Open Gemini Tokenizer Panel"
+      },
+      {
+        "command": "chimera-dashboard.showMcpPanel",
+        "title": "Chimera: Show MCP Panel"
+      },
+      {
+        "command": "chimera-dashboard.geminiGenerateCompletion",
+        "title": "Chimera: Generate Code Completion",
+        "enablement": "editorFocus"
+      },
+      {
+        "command": "chimera-dashboard.geminiRefactorCode",
+        "title": "Chimera: Refactor Selected Code",
+        "enablement": "editorHasSelection"
+      },
+      {
+        "command": "chimera-dashboard.geminiGenerateTests",
+        "title": "Chimera: Generate Tests for Code",
+        "enablement": "editorFocus"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "chimera-sidebar",
+          "title": "Project Chimera",
+          "icon": "resources/chimera-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "chimera-sidebar": [
+        {
+          "id": "chimera-services",
+          "name": "Services"
+        },
+        {
+          "id": "chimera-controls",
+          "name": "Controls"
+        },
+        {
+          "id": "chimera-terminals",
+          "name": "Terminals"
+        },
+        {
+          "id": "chimera-settings",
+          "name": "Configuration"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Project Chimera",
+      "properties": {
+        "chimera.mcpUrl": {
+          "type": "string",
+          "default": "http://localhost:8000/mcp",
+          "description": "URL for the MCP server"
+        },
+        "chimera.authRequired": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether authentication is required for MCP connection"
+        },
+        "chimera.username": {
+          "type": "string",
+          "default": "",
+          "description": "Username for MCP authentication"
+        },
+        "chimera.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API key for MCP authentication"
+        },
+        "chimera.theme": {
+          "type": "string",
+          "enum": [
+            "madScientist",
+            "darkLab",
+            "toxicGreen"
+          ],
+          "default": "madScientist",
+          "description": "Theme for the Chimera Dashboard"
+        }
+      }
+    },
+    "menus": {
+      "editor/context": [
+        {
+          "command": "chimera-dashboard.geminiGenerateCompletion",
+          "group": "1_modification",
+          "when": "editorFocus"
+        },
+        {
+          "command": "chimera-dashboard.geminiRefactorCode",
+          "group": "1_modification",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "chimera-dashboard.geminiGenerateTests",
+          "group": "1_modification",
+          "when": "editorFocus"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.3",
+    "@types/mocha": "^8.2.2",
+    "@types/node": "^14.14.37",
+    "@types/vscode": "^1.60.0",
+    "@typescript-eslint/eslint-plugin": "^4.22.0",
+    "@typescript-eslint/parser": "^4.22.0",
+    "eslint": "^7.24.0",
+    "glob": "^7.1.7",
+    "mocha": "^8.3.2",
+    "typescript": "^4.2.4"
+  },
+  "dependencies": {
+    "@radix-ui/react-label": "^2.1.2",
+    "@radix-ui/react-progress": "^1.1.2",
+    "@radix-ui/react-select": "^2.1.6",
+    "@radix-ui/react-slider": "^1.2.3",
+    "@radix-ui/react-slot": "^1.1.2",
+    "@radix-ui/react-switch": "^1.1.3",
+    "@radix-ui/react-tabs": "^1.1.3",
+    "axios": "^1.6.7",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.487.0",
+    "path": "^0.12.7",
+    "tailwind-merge": "^3.1.0",
+    "tw-animate-css": "^1.2.5"
+  }
+}
